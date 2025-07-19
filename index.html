@@ -6,12 +6,19 @@
     <title>Cloosed Hub - Belajar Bahasa Modern</title>
     <meta name="description" content="Website interaktif untuk belajar bahasa modern seperti Inggris, Jepang, Korea, dan lainnya. Dilengkapi kursus, kuis, flashcard, dan fitur komunitas.">
     <meta name="keywords" content="belajar bahasa, kursus bahasa, bahasa Inggris, bahasa Jepang, bahasa Korea, flashcard, kuis, pronunciation, gamifikasi, komunitas bahasa">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN (Updated to latest) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- PWA: Link to manifest.json -->
-    <link rel="manifest" href="/manifest.json">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- PWA: Link to manifest.json - PATH FIXED -->
+    <link rel="manifest" href="manifest.json">
     <!-- PWA: Theme color for browser UI -->
     <meta name="theme-color" content="#4F46E5">
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -40,12 +47,15 @@
             @apply text-gray-700 hover:text-indigo-600 transition-colors duration-200;
         }
         .feature-icon {
-            @apply text-indigo-500 text-4xl mb-4;
+            /* @apply text-indigo-500 text-4xl mb-4; */ /* Removed emoji-specific styling */
+            color: #6366f1; /* Indigo-500 equivalent */
+            font-size: 2.5rem; /* 4xl equivalent */
+            margin-bottom: 1rem; /* mb-4 equivalent */
         }
         /* Custom animations */
         .fade-in {
             animation: fadeIn 1s ease-out forwards;
-            opacity: 0;
+            opacity: 0; /* Initial state for animation */
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -53,8 +63,8 @@
         }
         .slide-in-left {
             animation: slideInLeft 1s ease-out forwards;
-            opacity: 0;
-            transform: translateX(-50px);
+            opacity: 0; /* Initial state for animation */
+            transform: translateX(-50px); /* Initial state for animation */
         }
         @keyframes slideInLeft {
             from { opacity: 0; transform: translateX(-50px); }
@@ -62,8 +72,8 @@
         }
         .slide-in-right {
             animation: slideInRight 1s ease-out forwards;
-            opacity: 0;
-            transform: translateX(50px);
+            opacity: 0; /* Initial state for animation */
+            transform: translateX(50px); /* Initial state for animation */
         }
         @keyframes slideInRight {
             from { opacity: 0; transform: translateX(50px); }
@@ -79,20 +89,71 @@
             display: none; /* Hidden by default */
             transition: transform 0.3s ease-in-out;
             transform: translateX(100%); /* Start off-screen */
+            position: fixed; /* Ensures it's always in viewport */
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 75%; /* Adjust width as needed */
+            max-width: 300px; /* Max width for larger screens */
+            background-color: white;
+            z-index: 50;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 5rem; /* Space for close button */
+            box-shadow: -4px 0 10px rgba(0,0,0,0.1);
         }
         .mobile-menu.active {
             display: flex; /* Show when active */
             transform: translateX(0); /* Slide into view */
         }
+        /* Overlay for mobile menu */
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+        }
+        .mobile-menu-overlay.active {
+            display: block;
+        }
+
+        /* Message Box styles */
+        .message-box {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .message-box.active {
+            opacity: 1;
+        }
+        .message-box.error {
+            background-color: #f44336;
+        }
     </style>
 </head>
 <body>
 
+    <!-- Message Box -->
+    <div id="messageBox" class="message-box"></div>
+    <div id="mobile-menu-overlay" class="mobile-menu-overlay" onclick="toggleMobileMenu()"></div>
+
     <!-- Header / Navigation Bar -->
-    <header class="bg-white shadow-sm py-4 px-6 md:px-12 sticky top-0 z-50">
+    <header class="bg-white shadow-sm py-4 px-6 md:px-12 sticky top-0 z-40"> <!-- z-index adjusted -->
         <nav class="container mx-auto flex justify-between items-center">
             <a href="#" class="text-2xl font-bold text-indigo-600 flex items-center">
-                <!-- Logo here - Increased size for better visibility -->
                 <img src="./images/logo.png" alt="Cloosed Hub Logo" class="h-10 w-10 mr-3 rounded-full">
                 Cloosed Hub
             </a>
@@ -112,7 +173,7 @@
                 </button>
             </div>
         </nav>
-        <!-- Mobile Menu Overlay -->
+        <!-- Mobile Menu Overlay (Moved to body for better z-index control) -->
         <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-64 bg-white shadow-lg flex flex-col items-center pt-20 space-y-6 md:hidden z-50">
             <button id="close-mobile-menu" class="absolute top-4 right-4 text-gray-600 hover:text-indigo-600 focus:outline-none">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -140,8 +201,8 @@
                 <a href="#courses" class="btn-primary inline-block fade-in delay-2">Mulai Belajar Sekarang!</a>
             </div>
             <div class="md:w-1/2 flex justify-center fade-in delay-3">
-                <!-- Illustration for language learning -->
-                <img src="./images/Gemini_Generated_Image_4j7kjo4j7kjo4j7k.jpg" alt="Ilustrasi pembelajaran bahasa dengan konsep vektor dan matematika" class="rounded-xl shadow-2xl max-w-full h-auto">
+                <!-- Illustration for language learning - PATH FIXED HERE -->
+                <img src="./images/ilustrasi.png" alt="Ilustrasi pembelajaran bahasa dengan konsep vektor dan matematika" class="rounded-xl shadow-2xl max-w-full h-auto">
             </div>
         </div>
     </section>
@@ -153,37 +214,37 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Feature 1: Kursus Interaktif -->
                 <div class="card fade-in delay-1">
-                    <div class="feature-icon">📚</div>
+                    <div class="feature-icon"><i class="fas fa-book-open"></i></div> <!-- Icon changed -->
                     <h3 class="text-xl font-semibold mb-2">Kursus Interaktif</h3>
                     <p class="text-gray-600">Belajar dengan teks, audio, dan video. Progres belajar Anda tersimpan otomatis.</p>
                 </div>
                 <!-- Feature 2: Latihan Vocabulary -->
                 <div class="card fade-in delay-2">
-                    <div class="feature-icon">📇</div>
+                    <div class="feature-icon"><i class="fas fa-spell-check"></i></div> <!-- Icon changed -->
                     <h3 class="text-xl font-semibold mb-2">Latihan Vocabulary</h3>
                     <p class="text-gray-600">Perkaya kosakata Anda dengan flashcard interaktif yang mudah diingat.</p>
                 </div>
                 <!-- Feature 3: Quiz & Ujian -->
                 <div class="card fade-in delay-3">
-                    <div class="feature-icon">📝</div>
+                    <div class="feature-icon"><i class="fas fa-question-circle"></i></div> <!-- Icon changed -->
                     <h3 class="text-xl font-semibold mb-2">Quiz & Ujian</h3>
                     <p class="text-gray-600">Uji pemahaman Anda dengan soal pilihan ganda dan dapatkan jawaban instan.</p>
                 </div>
                 <!-- Feature 4: Audio Pronunciation -->
                 <div class="card fade-in delay-4">
-                    <div class="feature-icon">🗣️</div>
+                    <div class="feature-icon"><i class="fas fa-microphone-alt"></i></div> <!-- Icon changed -->
                     <h3 class="text-xl font-semibold mb-2">Audio Pronunciation</h3>
                     <p class="text-gray-600">Dengarkan contoh pelafalan kata yang akurat untuk meningkatkan aksen Anda.</p>
                 </div>
                 <!-- Feature 5: Gamifikasi Menarik -->
                 <div class="card fade-in delay-1">
-                    <div class="feature-icon">🏆</div>
+                    <div class="feature-icon"><i class="fas fa-trophy"></i></div> <!-- Icon changed -->
                     <h3 class="text-xl font-semibold mb-2">Gamifikasi Menarik</h3>
                     <p class="text-gray-600">Dapatkan poin, naiki leaderboard, dan kumpulkan badge pencapaian.</p>
                 </div>
                 <!-- Feature 6: Komunitas Aktif -->
                 <div class="card fade-in delay-2">
-                    <div class="feature-icon">💬</div>
+                    <div class="feature-icon"><i class="fas fa-users"></i></div> <!-- Icon changed -->
                     <h3 class="text-xl font-semibold mb-2">Komunitas Aktif</h3>
                     <p class="text-gray-600">Berdiskusi dengan sesama pembelajar di forum dan ikuti tantangan mingguan.</p>
                 </div>
@@ -246,12 +307,12 @@
             <h2 class="text-3xl md:text-4xl font-bold mb-12 fade-in">Tingkatkan Motivasi dengan Gamifikasi!</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="card bg-indigo-600 text-white fade-in delay-1">
-                    <div class="feature-icon">🏅</div>
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div> <!-- Icon changed -->
                     <h3 class="text-xl font-semibold mb-2">Leaderboard & Point System</h3>
                     <p class="text-gray-200">Bersaing dengan teman-teman dan lihat posisi Anda di leaderboard global. Dapatkan poin untuk setiap pelajaran yang diselesaikan dan kuis yang dijawab.</p>
                 </div>
                 <div class="card bg-indigo-600 text-white fade-in delay-2">
-                    <div class="feature-icon">🌟</div>
+                    <div class="feature-icon"><i class="fas fa-award"></i></div> <!-- Icon changed -->
                     <h3 class="text-xl font-semibold mb-2">Badge & Pencapaian</h3>
                     <p class="text-gray-200">Kumpulkan badge unik untuk setiap milestone yang Anda capai, dari menyelesaikan level hingga menguasai kosakata baru.</p>
                 </div>
@@ -265,13 +326,13 @@
             <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-12 fade-in">Bergabunglah dengan Komunitas Kami</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="card fade-in delay-1">
-                    <div class="feature-icon">🗣️</div>
+                    <div class="feature-icon"><i class="fas fa-comments"></i></div> <!-- Icon changed -->
                     <h3 class="text-xl font-semibold mb-2">Forum Diskusi Aktif</h3>
                     <p class="text-gray-600">Ajukan pertanyaan, bagikan tips, dan berinteraksi dengan sesama pembelajar dari seluruh dunia.</p>
                     <a href="#" class="btn-secondary mt-4">Kunjungi Forum</a>
                 </div>
                 <div class="card fade-in delay-2">
-                    <div class="feature-icon">🎯</div>
+                    <div class="feature-icon"><i class="fas fa-calendar-check"></i></div> <!-- Icon changed -->
                     <h3 class="text-xl font-semibold mb-2">Tantangan Belajar Mingguan</h3>
                     <p class="text-gray-600">Ikuti tantangan seru setiap minggu untuk menguji kemampuan Anda dan memenangkan hadiah.</p>
                     <a href="#" class="btn-secondary mt-4">Ikuti Tantangan</a>
@@ -280,16 +341,26 @@
         </div>
     </section>
 
-    <!-- Dashboard Placeholder Section -->
-    <section id="dashboard" class="section-padding bg-gray-100">
+    <!-- Firebase Firestore Section (Contoh Fungsionalitas) -->
+    <section id="user-notes" class="section-padding bg-gray-100">
         <div class="container mx-auto text-center">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-12 fade-in">Dashboard Anda</h2>
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-12 fade-in">Catatan Pengguna (Firebase Firestore)</h2>
             <div class="bg-white rounded-xl shadow-lg p-8 fade-in delay-1">
                 <p class="text-lg text-gray-700 mb-4">
-                    Setelah masuk, Anda akan memiliki akses ke dashboard pribadi untuk melacak progres belajar, melihat skor kuis, dan menemukan materi terbaru.
+                    ID Pengguna Anda: <span id="userIdDisplay" class="font-semibold text-indigo-600">Memuat...</span>
                 </p>
-                <img src="https://placehold.co/600x300/a78bfa/ffffff?text=Tampilan+Dashboard" alt="Tampilan Dashboard" class="rounded-lg shadow-md mx-auto max-w-full h-auto mb-6">
-                <a href="#login" class="btn-primary">Masuk ke Dashboard</a>
+
+                <div class="flex flex-col md:flex-row gap-4 mb-6">
+                    <input type="text" id="noteInput" placeholder="Tulis catatan baru di sini..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <button id="addNoteBtn" class="btn-primary">
+                        Tambah Catatan
+                    </button>
+                </div>
+
+                <div id="notesList" class="space-y-4 text-left">
+                    <!-- Catatan akan dimuat di sini -->
+                    <p class="text-gray-500 text-center" id="loadingNotes">Memuat catatan...</p>
+                </div>
             </div>
         </div>
     </section>
@@ -316,16 +387,16 @@
             <div>
                 <h3 class="text-xl font-semibold text-white mb-4">Kontak Kami</h3>
                 <p class="text-sm">Email: info@cloosedhub.com</p>
-                <p class="text-sm">Telepon: +62 812 3456 7890</p>
-                <p class="text-sm">Alamat: Jl. Belajar Bahasa No. 123, Jakarta, Indonesia</p>
+                <p class="text-sm">Telepon: +62 877 7915 2773</p>
+                <p class="text-sm">Alamat: Jl. Pasirwangi, Garut, Indonesia</p>
             </div>
             <div>
                 <h3 class="text-xl font-semibold text-white mb-4">Ikuti Kami</h3>
                 <div class="flex space-x-4">
-                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">Facebook</a>
-                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">Twitter</a>
-                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">Instagram</a>
-                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">LinkedIn</a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200"><i class="fab fa-facebook-f"></i> Facebook</a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200"><i class="fab fa-twitter"></i> Twitter</a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200"><i class="fab fa-instagram"></i> Instagram</a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200"><i class="fab fa-linkedin-in"></i> LinkedIn</a>
                 </div>
             </div>
         </div>
@@ -334,14 +405,168 @@
         </div>
     </footer>
 
-    <script>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase config and app ID
+        // These are provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+        let app, db, auth, userId;
+        let isAuthReady = false; // Flag to ensure Firestore operations wait for auth
+
+        // Function to display messages (instead of alert())
+        function showMessage(message, type = 'success') {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = 'message-box'; // Reset classes
+            if (type === 'error') {
+                messageBox.classList.add('error');
+            }
+            messageBox.classList.add('active'); // Show message
+            setTimeout(() => {
+                messageBox.classList.remove('active'); // Hide message
+            }, 3000);
+        }
+
+        // Initialize Firebase and set up authentication
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
+                    showMessage("Firebase config tidak ditemukan atau tidak lengkap. Pastikan '__firebase_config' tersedia.", 'error');
+                    console.error("Firebase config is missing or incomplete:", firebaseConfig);
+                    return;
+                }
+
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Sign in anonymously or with custom token
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('userIdDisplay').textContent = userId;
+                        console.log("Pengguna terautentikasi:", userId);
+                    } else {
+                        // If no user is signed in, try anonymous sign-in
+                        try {
+                            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                            // Re-run onAuthStateChanged to get the new user.uid
+                        } catch (anonError) {
+                            console.error("Kesalahan saat mencoba masuk anonim:", anonError);
+                            userId = crypto.randomUUID(); // Fallback to a random ID if anonymous sign-in fails
+                            document.getElementById('userIdDisplay').textContent = userId + " (Anonim/Gagal Auth)";
+                            showMessage(`Gagal autentikasi: ${anonError.message}. Menggunakan ID anonim sementara.`, 'error');
+                        }
+                    }
+                    isAuthReady = true; // Auth state has been checked
+                    setupFirestoreListener(); // Setup Firestore listener after auth state is determined
+                });
+
+            } catch (error) {
+                console.error("Kesalahan inisialisasi Firebase atau autentikasi:", error);
+                showMessage(`Kesalahan inisialisasi: ${error.message}`, 'error');
+            }
+        });
+
+        // Function to set up real-time Firestore listener
+        function setupFirestoreListener() {
+            if (!db || !userId || !isAuthReady) {
+                console.warn("Firestore, User ID, atau Auth belum siap. Menunggu...");
+                return;
+            }
+
+            const notesList = document.getElementById('notesList');
+            const loadingNotes = document.getElementById('loadingNotes');
+
+            // Check if elements exist before manipulating them
+            if (!notesList || !loadingNotes) {
+                console.error("Elemen 'notesList' atau 'loadingNotes' tidak ditemukan di DOM. Menunda setup listener.");
+                // Optionally, you might want to retry after a short delay here
+                return;
+            }
+
+            // Public data collection path: /artifacts/{appId}/public/data/{your_collection_name}
+            const notesCollectionRef = collection(db, `artifacts/${appId}/public/data/notes`);
+            const q = query(notesCollectionRef); // Removed orderBy to prevent potential index issues
+
+            onSnapshot(q, (snapshot) => {
+                notesList.innerHTML = ''; // Clear existing notes
+                loadingNotes.style.display = 'none'; // Hide loading text
+
+                if (snapshot.empty) {
+                    notesList.innerHTML = '<p class="text-gray-500 text-center">Belum ada catatan. Tambahkan yang pertama!</p>';
+                } else {
+                    snapshot.forEach((doc) => {
+                        const note = doc.data();
+                        const noteElement = document.createElement('div');
+                        noteElement.className = 'bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200';
+                        noteElement.innerHTML = `
+                            <p class="text-gray-800 font-medium">${note.text}</p>
+                            <p class="text-gray-500 text-sm mt-1">Oleh: ${note.authorId ? note.authorId.substring(0, 8) + '...' : 'Anonim'} pada ${note.timestamp ? new Date(note.timestamp.toDate()).toLocaleString() : 'Tidak diketahui'}</p>
+                        `;
+                        notesList.appendChild(noteElement);
+                    });
+                }
+            }, (error) => {
+                console.error("Kesalahan mendengarkan catatan Firestore:", error);
+                showMessage(`Gagal memuat catatan: ${error.message}`, 'error');
+            });
+        }
+
+        // Add Note functionality
+        document.getElementById('addNoteBtn').addEventListener('click', async () => {
+            const noteInput = document.getElementById('noteInput');
+            const noteText = noteInput.value.trim();
+
+            if (noteText === '') {
+                showMessage("Catatan tidak boleh kosong!", 'error');
+                return;
+            }
+
+            if (!db || !userId || !isAuthReady) {
+                showMessage("Firebase belum siap atau ID pengguna tidak ada. Coba lagi.", 'error');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/public/data/notes`), {
+                    text: noteText,
+                    authorId: userId,
+                    timestamp: serverTimestamp() // Use serverTimestamp for consistent time
+                });
+                noteInput.value = ''; // Clear input
+                showMessage("Catatan berhasil ditambahkan!");
+            } catch (error) {
+                console.error("Kesalahan menambahkan catatan:", error);
+                showMessage(`Gagal menambahkan catatan: ${error.message}`, 'error');
+            }
+        });
+
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    // Close mobile menu if open
+                    if (mobileMenu.classList.contains('active')) {
+                        toggleMobileMenu();
+                    }
+                }
             });
         });
 
@@ -349,15 +574,17 @@
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
 
         function toggleMobileMenu() {
             mobileMenu.classList.toggle('active');
-            // Prevent scrolling when mobile menu is open
-            document.body.classList.toggle('overflow-hidden');
+            mobileMenuOverlay.classList.toggle('active');
+            document.body.classList.toggle('overflow-hidden'); // Prevent scrolling when mobile menu is open
         }
 
         mobileMenuButton.addEventListener('click', toggleMobileMenu);
         closeMobileMenuButton.addEventListener('click', toggleMobileMenu);
+        mobileMenuOverlay.addEventListener('click', toggleMobileMenu); // Close when clicking overlay
 
         // Close mobile menu when a link inside it is clicked
         mobileMenu.querySelectorAll('a').forEach(link => {
@@ -374,12 +601,14 @@
         const observer = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    entry.target.classList.add('animate-fade-in'); // Add a class that triggers animation
-                    entry.target.style.opacity = '1'; // Ensure it's visible after animation
-                    entry.target.style.transform = 'translateY(0)'; // Ensure it's in final position
+                    // Check if animation classes already exist to prevent re-triggering
+                    if (!entry.target.classList.contains('animated')) {
+                        entry.target.classList.add('fade-in'); // Add a class that triggers animation
+                        // Removed manual style manipulation as animation should handle it
+                        entry.target.classList.add('animated'); // Mark as animated
+                    }
                     observer.unobserve(entry.target); // Stop observing once animated
                 }
-            });
             });
         }, observerOptions);
 
@@ -387,65 +616,30 @@
             observer.observe(el);
         });
 
-        // Placeholder for future JavaScript functionalities
-        // Example: Flashcard logic (simplified)
-        function createFlashcard(word, translation) {
-            const flashcardContainer = document.createElement('div');
-            flashcardContainer.className = 'card bg-blue-100 p-4 rounded-lg cursor-pointer transform transition-transform duration-300 hover:scale-105';
-            flashcardContainer.innerHTML = `
-                <p class="text-2xl font-bold text-blue-800 text-center" data-side="front">${word}</p>
-                <p class="text-xl text-blue-600 text-center hidden" data-side="back">${translation}</p>
-            `;
-            flashcardContainer.addEventListener('click', () => {
-                const front = flashcardContainer.querySelector('[data-side="front"]');
-                const back = flashcardContainer.querySelector('[data-side="back"]');
-                front.classList.toggle('hidden');
-                back.classList.toggle('hidden');
-            });
-            return flashcardContainer;
-        }
-
-        // You would typically fetch these from a database
-        const vocabularyWords = [
-            { word: "Hello", translation: "Halo" },
-            { word: "Thank you", translation: "Terima kasih" },
-            { word: "Please", translation: "Tolong" },
-            { word: "Goodbye", translation: "Sampai jumpa" }
-        ];
-
-        // Example of how you might render flashcards (e.g., in a dedicated section)
-        // const vocabularySection = document.getElementById('vocabulary-section'); // Assuming you add this section
-        // if (vocabularySection) {
-        //     vocabularyWords.forEach(item => {
-        //         vocabularySection.appendChild(createFlashcard(item.word, item.translation));
-        //     });
-        // }
-
         // Placeholder for Audio Pronunciation
         function playAudio(text) {
-            // In a real application, you'd use a text-to-speech API or pre-recorded audio files
             console.log(`Playing audio for: "${text}"`);
-            // Example using Web Speech API (limited browser support for some voices)
             if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-US'; // Or appropriate language
                 window.speechSynthesis.speak(utterance);
             } else {
-                alert('Browser Anda tidak mendukung Web Speech API.');
+                showMessage('Browser Anda tidak mendukung Web Speech API.', 'error'); // Using showMessage
             }
         }
-
-        // Example usage: <button onclick="playAudio('Hello')">Play</button>
 
         // PWA: Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                // Construct full URL for service worker to avoid protocol issues in some environments
+                const serviceWorkerUrl = new URL('service-worker.js', location.href).href;
+                navigator.serviceWorker.register(serviceWorkerUrl, { scope: './' })
                     .then(registration => {
                         console.log('Service Worker registered successfully:', registration);
                     })
                     .catch(error => {
                         console.error('Service Worker registration failed:', error);
+                        showMessage(`Gagal mendaftarkan Service Worker: ${error.message}`, 'error');
                     });
             });
         }
