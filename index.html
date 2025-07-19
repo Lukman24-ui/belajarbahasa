@@ -270,40 +270,40 @@
                     <img src="https://flagcdn.com/w320/us.png" alt="Bendera Amerika Serikat - Kursus Bahasa Inggris" class="rounded-lg mb-4 w-full h-auto">
                     <h3 class="text-xl font-semibold mb-2">Bahasa Inggris</h3>
                     <p class="text-gray-600 mb-4">Mulai dari dasar hingga mahir, tingkatkan kemampuan speaking, listening, reading, dan writing Anda.</p>
-                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                    <button class="btn-primary text-sm view-course-btn" data-lang="English">Lihat Kursus</button>
                 </div>
                 <!-- Course Card: Japanese -->
                 <div class="card fade-in delay-2">
                     <img src="https://flagcdn.com/w320/jp.png" alt="Bendera Jepang - Kursus Bahasa Jepang" class="rounded-lg mb-4 w-full h-auto">
                     <h3 class="text-xl font-semibold mb-2">Bahasa Jepang</h3>
                     <p class="text-gray-600 mb-4">Pelajari Hiragana, Katakana, Kanji, dan percakapan sehari-hari untuk perjalanan atau bisnis.</p>
-                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                    <button class="btn-primary text-sm view-course-btn" data-lang="Japanese">Lihat Kursus</button>
                 </div>
                 <!-- Course Card: Korean -->
                 <div class="card fade-in delay-3">
                     <img src="https://flagcdn.com/w320/kr.png" alt="Bendera Korea Selatan - Kursus Bahasa Korea" class="rounded-lg mb-4 w-full h-auto">
                     <h3 class="text-xl font-semibold mb-2">Bahasa Korea</h3>
                     <p class="text-gray-600 mb-4">Kuasai Hangul dan frasa penting untuk K-Pop, K-Drama, atau studi di Korea.</p>
-                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                    <button class="btn-primary text-sm view-course-btn" data-lang="Korean">Lihat Kursus</button>
                 </div>
                 <!-- Add more languages as needed -->
                 <div class="card fade-in delay-4">
                     <img src="https://flagcdn.com/w320/cn.png" alt="Bendera Tiongkok - Kursus Bahasa Mandarin" class="rounded-lg mb-4 w-full h-auto">
                     <h3 class="text-xl font-semibold mb-2">Bahasa Mandarin</h3>
                     <p class="text-gray-600 mb-4">Pelajari Pinyin, karakter dasar, dan percakapan bisnis atau budaya.</p>
-                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                    <button class="btn-primary text-sm view-course-btn" data-lang="Mandarin">Lihat Kursus</button>
                 </div>
                 <div class="card fade-in delay-1">
                     <img src="https://flagcdn.com/w320/de.png" alt="Bendera Jerman - Kursus Bahasa Jerman" class="rounded-lg mb-4 w-full h-auto">
                     <h3 class="text-xl font-semibold mb-2">Bahasa Jerman</h3>
                     <p class="text-gray-600 mb-4">Jelajahi tata bahasa, kosakata, dan budaya Jerman untuk studi atau pekerjaan.</p>
-                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                    <button class="btn-primary text-sm view-course-btn" data-lang="German">Lihat Kursus</button>
                 </div>
                 <div class="card fade-in delay-2">
                     <img src="https://flagcdn.com/w320/es.png" alt="Bendera Spanyol - Kursus Bahasa Spanyol" class="rounded-lg mb-4 w-full h-auto">
                     <h3 class="text-xl font-semibold mb-2">Bahasa Spanyol</h3>
                     <p class="text-gray-600 mb-4">Pelajari bahasa romantis ini untuk bepergian, bekerja, atau sekadar bersenang-senang.</p>
-                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                    <button class="btn-primary text-sm view-course-btn" data-lang="Spanish">Lihat Kursus</button>
                 </div>
             </div>
         </div>
@@ -672,7 +672,7 @@
             }
         });
 
-        // Quiz Functions (unchanged from previous version)
+        // Quiz Functions
         function setupQuizUI() {
             const startQuizBtn = document.getElementById('startQuizBtn');
             const quizLangSelect = document.getElementById('quizLangSelect');
@@ -718,7 +718,7 @@
                 const querySnapshot = await getDocs(q);
 
                 if (querySnapshot.empty) {
-                    showMessage(`Tidak ada pertanyaan kuis untuk bahasa ${language}.`, 'error');
+                    showMessage(`Tidak ada pertanyaan kuis untuk bahasa ${language}. Pastikan Anda sudah menambahkan data kuis di Firestore.`, 'error');
                     return;
                 }
 
@@ -749,6 +749,7 @@
         }
 
         function displayQuestion() {
+            const questionData = currentQuizQuestions[currentQuestionIndex];
             const currentQuestionNumberEl = document.getElementById('currentQuestionNumber');
             const totalQuestionsEl = document.getElementById('totalQuestions');
             const quizQuestionEl = document.getElementById('quizQuestion');
@@ -759,13 +760,11 @@
             const finishQuizBtnEl = document.getElementById('finishQuizBtn');
             const quizOptionsEl = document.getElementById('quizOptions');
 
-            // Ensure all elements exist
             if (!currentQuestionNumberEl || !totalQuestionsEl || !quizQuestionEl || !quizAnswerInputEl || !quizFeedbackEl || !submitAnswerBtnEl || !nextQuestionBtnEl || !finishQuizBtnEl || !quizOptionsEl) {
                 console.error("Salah satu elemen tampilan kuis tidak ditemukan.");
                 return;
             }
 
-            const questionData = currentQuizQuestions[currentQuestionIndex];
             currentQuestionNumberEl.textContent = currentQuestionIndex + 1;
             totalQuestionsEl.textContent = QUIZ_QUESTION_LIMIT;
             quizQuestionEl.textContent = questionData.question;
@@ -943,11 +942,16 @@
 
 
         // Register User
-        if (registerForm && auth) { // Ensure auth is defined before attaching listener
+        if (registerForm) { // Ensure registerForm exists
             registerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = registerForm.registerEmail.value;
                 const password = registerForm.registerPassword.value;
+
+                if (!auth) { // Ensure auth is defined
+                    showMessage("Firebase Auth belum siap. Coba lagi.", 'error');
+                    return;
+                }
 
                 try {
                     await createUserWithEmailAndPassword(auth, email, password);
@@ -962,11 +966,16 @@
         }
 
         // Login User
-        if (loginForm && auth) { // Ensure auth is defined before attaching listener
+        if (loginForm) { // Ensure loginForm exists
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = loginForm.loginEmail.value;
                 const password = loginForm.loginPassword.value;
+
+                if (!auth) { // Ensure auth is defined
+                    showMessage("Firebase Auth belum siap. Coba lagi.", 'error');
+                    return;
+                }
 
                 try {
                     await signInWithEmailAndPassword(auth, email, password);
@@ -981,8 +990,12 @@
         }
 
         // Logout User
-        if (navLogoutBtn && auth) { // Ensure auth is defined before attaching listener
+        if (navLogoutBtn) { // Ensure navLogoutBtn exists
             navLogoutBtn.addEventListener('click', async () => {
+                if (!auth) { // Ensure auth is defined
+                    showMessage("Firebase Auth belum siap. Coba lagi.", 'error');
+                    return;
+                }
                 try {
                     await signOut(auth);
                     showMessage("Berhasil keluar.", 'success');
@@ -994,8 +1007,12 @@
             });
         }
 
-        if (mobileNavLogoutBtn && auth) { // Ensure auth is defined before attaching listener
+        if (mobileNavLogoutBtn) { // Ensure mobileNavLogoutBtn exists
             mobileNavLogoutBtn.addEventListener('click', async () => {
+                if (!auth) { // Ensure auth is defined
+                    showMessage("Firebase Auth belum siap. Coba lagi.", 'error');
+                    return;
+                }
                 try {
                     await signOut(auth);
                     showMessage("Berhasil keluar.", 'success');
@@ -1009,7 +1026,7 @@
         }
 
 
-        // Smooth scrolling for navigation links (original logic, but updated to handle new forms)
+        // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 const href = this.getAttribute('href');
@@ -1020,7 +1037,6 @@
                     e.preventDefault();
                     showRegisterForm();
                 } else {
-                    // Default smooth scroll for other sections
                     e.preventDefault();
                     const targetElement = document.querySelector(href);
                     if (targetElement) {
@@ -1035,7 +1051,7 @@
             });
         });
 
-        // Mobile menu toggle (unchanged from previous version)
+        // Mobile menu toggle
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         const closeMobileMenuButton = document.getElementById('close-mobile-menu');
@@ -1047,21 +1063,23 @@
             document.body.classList.toggle('overflow-hidden');
         }
 
-        mobileMenuButton.addEventListener('click', toggleMobileMenu);
-        closeMobileMenuButton.addEventListener('click', toggleMobileMenu);
-        mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
+        if (mobileMenuButton) mobileMenuButton.addEventListener('click', toggleMobileMenu);
+        if (closeMobileMenuButton) closeMobileMenuButton.addEventListener('click', toggleMobileMenu);
+        if (mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
 
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                // Only toggle if it's not a login/register link handled by specific functions
-                const href = link.getAttribute('href');
-                if (href !== '#login-form' && href !== '#register-form') {
-                    toggleMobileMenu();
-                }
+        if (mobileMenu) {
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const href = link.getAttribute('href');
+                    if (href !== '#login-form' && href !== '#register-form') {
+                        toggleMobileMenu();
+                    }
+                });
             });
-        });
+        }
 
-        // Intersection Observer for fade-in animations (unchanged from previous version)
+
+        // Intersection Observer for fade-in animations
         const observerOptions = {
             root: null,
             rootMargin: '0px',
@@ -1084,7 +1102,7 @@
             observer.observe(el);
         });
 
-        // Placeholder for Audio Pronunciation (unchanged from previous version)
+        // Placeholder for Audio Pronunciation
         function playAudio(text) {
             console.log(`Playing audio for: "${text}"`);
             if ('speechSynthesis' in window) {
@@ -1096,7 +1114,7 @@
             }
         }
 
-        // PWA: Register Service Worker (unchanged from previous version, still using absolute URL construction)
+        // PWA: Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 const serviceWorkerUrl = new URL('service-worker.js', location.href).href;
@@ -1110,6 +1128,26 @@
                     });
             });
         }
+
+        // --- New: Course Button Functionality ---
+        document.querySelectorAll('.view-course-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const language = this.dataset.lang; // Get language from data-lang attribute
+                if (language) {
+                    showMessage(`Anda memilih kursus Bahasa ${language}!`, 'success');
+                    // --- IDE UNTUK PENGEMBANGAN LEBIH LANJUT ---
+                    // Di sini Anda bisa:
+                    // 1. Mengarahkan pengguna ke halaman kursus spesifik:
+                    //    window.location.href = `courses/${language.toLowerCase()}.html`;
+                    // 2. Memuat konten kursus secara dinamis di halaman yang sama (misalnya dari Firestore):
+                    //    loadCourseContent(language);
+                    // 3. Menampilkan modal dengan detail kursus.
+                    // 4. Mengarahkan ke bagian kuis harian untuk bahasa tersebut (jika ada kuis yang spesifik).
+                } else {
+                    showMessage('Bahasa kursus tidak ditemukan.', 'error');
+                }
+            });
+        });
     </script>
 </body>
 </html>
