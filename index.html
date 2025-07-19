@@ -47,7 +47,6 @@
             @apply text-gray-700 hover:text-indigo-600 transition-colors duration-200;
         }
         .feature-icon {
-            /* @apply text-indigo-500 text-4xl mb-4; */ /* Removed emoji-specific styling */
             color: #6366f1; /* Indigo-500 equivalent */
             font-size: 2.5rem; /* 4xl equivalent */
             margin-bottom: 1rem; /* mb-4 equivalent */
@@ -151,20 +150,25 @@
     <div id="mobile-menu-overlay" class="mobile-menu-overlay" onclick="toggleMobileMenu()"></div>
 
     <!-- Header / Navigation Bar -->
-    <header class="bg-white shadow-sm py-4 px-6 md:px-12 sticky top-0 z-40"> <!-- z-index adjusted -->
+    <header class="bg-white shadow-sm py-4 px-6 md:px-12 sticky top-0 z-40">
         <nav class="container mx-auto flex justify-between items-center">
             <a href="#" class="text-2xl font-bold text-indigo-600 flex items-center">
                 <img src="./images/logo.png" alt="Cloosed Hub Logo" class="h-10 w-10 mr-3 rounded-full">
                 Cloosed Hub
             </a>
-            <div class="hidden md:flex space-x-8">
+            <div class="hidden md:flex space-x-8 items-center">
                 <a href="#home" class="nav-link">Beranda</a>
                 <a href="#features" class="nav-link">Fitur</a>
                 <a href="#courses" class="nav-link">Kursus</a>
                 <a href="#community" class="nav-link">Komunitas</a>
+                <a href="#daily-quiz" class="nav-link">Kuis Harian</a>
                 <a href="#contact" class="nav-link">Kontak</a>
-                <a href="#login" class="btn-secondary ml-4">Masuk</a>
-                <a href="#register" class="btn-primary">Daftar</a>
+                <!-- Conditional Login/Register/Logout Buttons -->
+                <span id="authButtonsContainer" class="flex space-x-4">
+                    <a href="#login-form" id="navLoginBtn" class="btn-secondary">Masuk</a>
+                    <a href="#register-form" id="navRegisterBtn" class="btn-primary">Daftar</a>
+                    <button id="navLogoutBtn" class="btn-secondary hidden">Keluar</button>
+                </span>
             </div>
             <!-- Mobile Menu Button -->
             <div class="md:hidden">
@@ -173,7 +177,7 @@
                 </button>
             </div>
         </nav>
-        <!-- Mobile Menu Overlay (Moved to body for better z-index control) -->
+        <!-- Mobile Menu Overlay -->
         <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-64 bg-white shadow-lg flex flex-col items-center pt-20 space-y-6 md:hidden z-50">
             <button id="close-mobile-menu" class="absolute top-4 right-4 text-gray-600 hover:text-indigo-600 focus:outline-none">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -182,9 +186,14 @@
             <a href="#features" class="nav-link text-lg" onclick="toggleMobileMenu()">Fitur</a>
             <a href="#courses" class="nav-link text-lg" onclick="toggleMobileMenu()">Kursus</a>
             <a href="#community" class="nav-link text-lg" onclick="toggleMobileMenu()">Komunitas</a>
+            <a href="#daily-quiz" class="nav-link text-lg" onclick="toggleMobileMenu()">Kuis Harian</a>
             <a href="#contact" class="nav-link text-lg" onclick="toggleMobileMenu()">Kontak</a>
-            <a href="#login" class="btn-secondary w-4/5 text-center" onclick="toggleMobileMenu()">Masuk</a>
-            <a href="#register" class="btn-primary w-4/5 text-center" onclick="toggleMobileMenu()">Daftar</a>
+            <!-- Conditional Mobile Login/Register/Logout Buttons -->
+            <span id="mobileAuthButtonsContainer" class="flex flex-col space-y-4 w-4/5">
+                <a href="#login-form" id="mobileNavLoginBtn" class="btn-secondary w-full text-center" onclick="toggleMobileMenu()">Masuk</a>
+                <a href="#register-form" id="mobileNavRegisterBtn" class="btn-primary w-full text-center" onclick="toggleMobileMenu()">Daftar</a>
+                <button id="mobileNavLogoutBtn" class="btn-secondary w-full hidden" onclick="toggleMobileMenu()">Keluar</button>
+            </span>
         </div>
     </header>
 
@@ -201,7 +210,6 @@
                 <a href="#courses" class="btn-primary inline-block fade-in delay-2">Mulai Belajar Sekarang!</a>
             </div>
             <div class="md:w-1/2 flex justify-center fade-in delay-3">
-                <!-- Illustration for language learning - PATH FIXED HERE -->
                 <img src="./images/ilustrasi.png" alt="Ilustrasi pembelajaran bahasa dengan konsep vektor dan matematika" class="rounded-xl shadow-2xl max-w-full h-auto">
             </div>
         </div>
@@ -214,37 +222,37 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Feature 1: Kursus Interaktif -->
                 <div class="card fade-in delay-1">
-                    <div class="feature-icon"><i class="fas fa-book-open"></i></div> <!-- Icon changed -->
+                    <div class="feature-icon"><i class="fas fa-book-open"></i></div>
                     <h3 class="text-xl font-semibold mb-2">Kursus Interaktif</h3>
                     <p class="text-gray-600">Belajar dengan teks, audio, dan video. Progres belajar Anda tersimpan otomatis.</p>
                 </div>
                 <!-- Feature 2: Latihan Vocabulary -->
                 <div class="card fade-in delay-2">
-                    <div class="feature-icon"><i class="fas fa-spell-check"></i></div> <!-- Icon changed -->
+                    <div class="feature-icon"><i class="fas fa-spell-check"></i></div>
                     <h3 class="text-xl font-semibold mb-2">Latihan Vocabulary</h3>
                     <p class="text-gray-600">Perkaya kosakata Anda dengan flashcard interaktif yang mudah diingat.</p>
                 </div>
                 <!-- Feature 3: Quiz & Ujian -->
                 <div class="card fade-in delay-3">
-                    <div class="feature-icon"><i class="fas fa-question-circle"></i></div> <!-- Icon changed -->
+                    <div class="feature-icon"><i class="fas fa-question-circle"></i></div>
                     <h3 class="text-xl font-semibold mb-2">Quiz & Ujian</h3>
                     <p class="text-gray-600">Uji pemahaman Anda dengan soal pilihan ganda dan dapatkan jawaban instan.</p>
                 </div>
                 <!-- Feature 4: Audio Pronunciation -->
                 <div class="card fade-in delay-4">
-                    <div class="feature-icon"><i class="fas fa-microphone-alt"></i></div> <!-- Icon changed -->
+                    <div class="feature-icon"><i class="fas fa-microphone-alt"></i></div>
                     <h3 class="text-xl font-semibold mb-2">Audio Pronunciation</h3>
                     <p class="text-gray-600">Dengarkan contoh pelafalan kata yang akurat untuk meningkatkan aksen Anda.</p>
                 </div>
                 <!-- Feature 5: Gamifikasi Menarik -->
                 <div class="card fade-in delay-1">
-                    <div class="feature-icon"><i class="fas fa-trophy"></i></div> <!-- Icon changed -->
+                    <div class="feature-icon"><i class="fas fa-trophy"></i></div>
                     <h3 class="text-xl font-semibold mb-2">Gamifikasi Menarik</h3>
                     <p class="text-gray-600">Dapatkan poin, naiki leaderboard, dan kumpulkan badge pencapaian.</p>
                 </div>
                 <!-- Feature 6: Komunitas Aktif -->
                 <div class="card fade-in delay-2">
-                    <div class="feature-icon"><i class="fas fa-users"></i></div> <!-- Icon changed -->
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
                     <h3 class="text-xl font-semibold mb-2">Komunitas Aktif</h3>
                     <p class="text-gray-600">Berdiskusi dengan sesama pembelajar di forum dan ikuti tantangan mingguan.</p>
                 </div>
@@ -307,12 +315,12 @@
             <h2 class="text-3xl md:text-4xl font-bold mb-12 fade-in">Tingkatkan Motivasi dengan Gamifikasi!</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="card bg-indigo-600 text-white fade-in delay-1">
-                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div> <!-- Icon changed -->
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
                     <h3 class="text-xl font-semibold mb-2">Leaderboard & Point System</h3>
                     <p class="text-gray-200">Bersaing dengan teman-teman dan lihat posisi Anda di leaderboard global. Dapatkan poin untuk setiap pelajaran yang diselesaikan dan kuis yang dijawab.</p>
                 </div>
                 <div class="card bg-indigo-600 text-white fade-in delay-2">
-                    <div class="feature-icon"><i class="fas fa-award"></i></div> <!-- Icon changed -->
+                    <div class="feature-icon"><i class="fas fa-award"></i></div>
                     <h3 class="text-xl font-semibold mb-2">Badge & Pencapaian</h3>
                     <p class="text-gray-200">Kumpulkan badge unik untuk setiap milestone yang Anda capai, dari menyelesaikan level hingga menguasai kosakata baru.</p>
                 </div>
@@ -326,16 +334,58 @@
             <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-12 fade-in">Bergabunglah dengan Komunitas Kami</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="card fade-in delay-1">
-                    <div class="feature-icon"><i class="fas fa-comments"></i></div> <!-- Icon changed -->
+                    <div class="feature-icon"><i class="fas fa-comments"></i></div>
                     <h3 class="text-xl font-semibold mb-2">Forum Diskusi Aktif</h3>
                     <p class="text-gray-600">Ajukan pertanyaan, bagikan tips, dan berinteraksi dengan sesama pembelajar dari seluruh dunia.</p>
                     <a href="#" class="btn-secondary mt-4">Kunjungi Forum</a>
                 </div>
                 <div class="card fade-in delay-2">
-                    <div class="feature-icon"><i class="fas fa-calendar-check"></i></div> <!-- Icon changed -->
+                    <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
                     <h3 class="text-xl font-semibold mb-2">Tantangan Belajar Mingguan</h3>
                     <p class="text-gray-600">Ikuti tantangan seru setiap minggu untuk menguji kemampuan Anda dan memenangkan hadiah.</p>
                     <a href="#" class="btn-secondary mt-4">Ikuti Tantangan</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Daily Quiz Section -->
+    <section id="daily-quiz" class="section-padding bg-indigo-500 text-white text-center">
+        <div class="container mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 fade-in">Kuis Harian Anda</h2>
+            <div class="bg-white rounded-xl shadow-lg p-8 fade-in delay-1 text-gray-800">
+                <div id="quizLanguageSelection" class="mb-6">
+                    <label for="quizLangSelect" class="block text-lg font-semibold mb-2">Pilih Bahasa Kuis:</label>
+                    <select id="quizLangSelect" class="p-2 border border-gray-300 rounded-lg w-full md:w-1/2 lg:w-1/3 mx-auto text-gray-800">
+                        <option value="">-- Pilih Bahasa --</option>
+                        <option value="English">Bahasa Inggris</option>
+                        <option value="Japanese">Bahasa Jepang</option>
+                        <option value="Korean">Bahasa Korea</option>
+                        <option value="Mandarin">Bahasa Mandarin</option>
+                        <option value="German">Bahasa Jerman</option>
+                        <option value="Spanish">Bahasa Spanyol</option>
+                    </select>
+                    <button id="startQuizBtn" class="btn-primary mt-4">Mulai Kuis</button>
+                </div>
+
+                <div id="quizContainer" class="hidden">
+                    <p class="text-lg mb-4"><span id="currentQuestionNumber">1</span>/<span id="totalQuestions">10</span></p>
+                    <p id="quizQuestion" class="text-2xl font-semibold mb-6"></p>
+                    <div id="quizOptions" class="flex flex-col space-y-3 mb-6">
+                        <!-- Options will be loaded here for multiple choice -->
+                    </div>
+                    <input type="text" id="quizAnswerInput" placeholder="Ketik jawaban Anda di sini..." class="p-3 border border-gray-300 rounded-lg w-full md:w-1/2 mx-auto focus:ring-indigo-500 focus:border-indigo-500 text-gray-800">
+                    <p id="quizFeedback" class="text-lg font-medium mt-4"></p>
+                    <div class="flex justify-center space-x-4 mt-6">
+                        <button id="submitAnswerBtn" class="btn-primary">Kirim Jawaban</button>
+                        <button id="nextQuestionBtn" class="btn-secondary hidden">Pertanyaan Berikutnya</button>
+                        <button id="finishQuizBtn" class="btn-primary hidden">Selesai Kuis</button>
+                    </div>
+                </div>
+                <div id="quizResult" class="hidden">
+                    <h3 class="text-2xl font-bold mb-4">Kuis Selesai!</h3>
+                    <p class="text-xl">Skor Anda: <span id="finalScore" class="font-bold">0</span>/<span id="maxScore">10</span></p>
+                    <button id="restartQuizBtn" class="btn-primary mt-6">Mulai Kuis Baru</button>
                 </div>
             </div>
         </div>
@@ -366,13 +416,43 @@
     </section>
 
     <!-- Login/Register Section -->
-    <section id="login" class="section-padding bg-indigo-600 text-white">
+    <section id="login-form" class="section-padding bg-indigo-600 text-white hidden"> <!-- Initially hidden -->
         <div class="container mx-auto text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-8 fade-in">Mulai Petualangan Belajar Anda</h2>
-            <p class="text-lg mb-8 fade-in delay-1">Daftar atau masuk untuk menyimpan progres belajar Anda dan mengakses semua fitur premium.</p>
-            <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
-                <a href="#" class="btn-secondary bg-white text-indigo-600 fade-in delay-2">Masuk</a>
-                <a href="#" class="btn-primary fade-in delay-3">Daftar Sekarang</a>
+            <h2 class="text-3xl md:text-4xl font-bold mb-8 fade-in">Masuk ke Akun Anda</h2>
+            <div class="bg-white rounded-xl shadow-lg p-8 fade-in delay-1 text-gray-800 max-w-md mx-auto">
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label for="loginEmail" class="block text-left text-gray-700 font-semibold mb-2">Email:</label>
+                        <input type="email" id="loginEmail" placeholder="email@example.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                    <div>
+                        <label for="loginPassword" class="block text-left text-gray-700 font-semibold mb-2">Kata Sandi:</label>
+                        <input type="password" id="loginPassword" placeholder="********" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                    <button type="submit" class="btn-primary w-full">Masuk</button>
+                </form>
+                <p class="text-sm text-gray-600 mt-4">Belum punya akun? <a href="#register-form" class="text-indigo-600 hover:underline" onclick="showRegisterForm()">Daftar di sini</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Register Section -->
+    <section id="register-form" class="section-padding bg-gray-100 hidden"> <!-- Initially hidden -->
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-8 fade-in">Daftar Akun Baru</h2>
+            <div class="bg-white rounded-xl shadow-lg p-8 fade-in delay-1 text-gray-800 max-w-md mx-auto">
+                <form id="registerForm" class="space-y-4">
+                    <div>
+                        <label for="registerEmail" class="block text-left text-gray-700 font-semibold mb-2">Email:</label>
+                        <input type="email" id="registerEmail" placeholder="email@example.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                    <div>
+                        <label for="registerPassword" class="block text-left text-gray-700 font-semibold mb-2">Kata Sandi:</label>
+                        <input type="password" id="registerPassword" placeholder="Minimal 6 karakter" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                    <button type="submit" class="btn-primary w-full">Daftar</button>
+                </form>
+                <p class="text-sm text-gray-600 mt-4">Sudah punya akun? <a href="#login-form" class="text-indigo-600 hover:underline" onclick="showLoginForm()">Masuk di sini</a></p>
             </div>
         </div>
     </section>
@@ -408,29 +488,38 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, getDocs, serverTimestamp, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global variables for Firebase config and app ID
-        // These are provided by the Canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
 
         let app, db, auth, userId;
-        let isAuthReady = false; // Flag to ensure Firestore operations wait for auth
+        let isAuthReady = false;
+
+        // Quiz variables
+        let currentQuizQuestions = [];
+        let currentQuestionIndex = 0;
+        let quizScore = 0;
+        const QUIZ_QUESTION_LIMIT = 10;
 
         // Function to display messages (instead of alert())
         function showMessage(message, type = 'success') {
             const messageBox = document.getElementById('messageBox');
-            messageBox.textContent = message;
-            messageBox.className = 'message-box'; // Reset classes
-            if (type === 'error') {
-                messageBox.classList.add('error');
+            if (messageBox) {
+                messageBox.textContent = message;
+                messageBox.className = 'message-box'; // Reset classes
+                if (type === 'error') {
+                    messageBox.classList.add('error');
+                }
+                messageBox.classList.add('active'); // Show message
+                setTimeout(() => {
+                    messageBox.classList.remove('active'); // Hide message
+                }, 3000);
+            } else {
+                console.warn("Message box element not found:", message);
             }
-            messageBox.classList.add('active'); // Show message
-            setTimeout(() => {
-                messageBox.classList.remove('active'); // Hide message
-            }, 3000);
         }
 
         // Initialize Firebase and set up authentication
@@ -446,30 +535,62 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
 
-                // Sign in anonymously or with custom token
+                // Listen for auth state changes
                 onAuthStateChanged(auth, async (user) => {
+                    const navLoginBtn = document.getElementById('navLoginBtn');
+                    const navRegisterBtn = document.getElementById('navRegisterBtn');
+                    const navLogoutBtn = document.getElementById('navLogoutBtn');
+                    const mobileNavLoginBtn = document.getElementById('mobileNavLoginBtn');
+                    const mobileNavRegisterBtn = document.getElementById('mobileNavRegisterBtn');
+                    const mobileNavLogoutBtn = document.getElementById('mobileNavLogoutBtn');
+                    const userIdDisplay = document.getElementById('userIdDisplay');
+
                     if (user) {
                         userId = user.uid;
-                        document.getElementById('userIdDisplay').textContent = userId;
+                        if (userIdDisplay) userIdDisplay.textContent = userId;
                         console.log("Pengguna terautentikasi:", userId);
+
+                        // Show logout, hide login/register
+                        if (navLoginBtn) navLoginBtn.classList.add('hidden');
+                        if (navRegisterBtn) navRegisterBtn.classList.add('hidden');
+                        if (navLogoutBtn) navLogoutBtn.classList.remove('hidden');
+                        if (mobileNavLoginBtn) mobileNavLoginBtn.classList.add('hidden');
+                        if (mobileNavRegisterBtn) mobileNavRegisterBtn.classList.add('hidden');
+                        if (mobileNavLogoutBtn) mobileNavLogoutBtn.classList.remove('hidden');
+
                     } else {
-                        // If no user is signed in, try anonymous sign-in
-                        try {
-                            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                                await signInWithCustomToken(auth, __initial_auth_token);
-                            } else {
-                                await signInAnonymously(auth);
+                        // If no user is signed in, try anonymous sign-in (only once on load)
+                        if (!isAuthReady) { // Only attempt anonymous sign-in if auth state hasn't been fully determined yet
+                            try {
+                                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                    await signInWithCustomToken(auth, __initial_auth_token);
+                                } else {
+                                    await signInAnonymously(auth);
+                                }
+                                // onAuthStateChanged will be triggered again with the anonymous user
+                            } catch (anonError) {
+                                console.error("Kesalahan saat mencoba masuk anonim:", anonError);
+                                userId = crypto.randomUUID(); // Fallback to a random ID if anonymous sign-in fails
+                                if (userIdDisplay) userIdDisplay.textContent = userId + " (Anonim/Gagal Auth)";
+                                showMessage(`Gagal autentikasi: ${anonError.message}. Menggunakan ID anonim sementara.`, 'error');
                             }
-                            // Re-run onAuthStateChanged to get the new user.uid
-                        } catch (anonError) {
-                            console.error("Kesalahan saat mencoba masuk anonim:", anonError);
-                            userId = crypto.randomUUID(); // Fallback to a random ID if anonymous sign-in fails
-                            document.getElementById('userIdDisplay').textContent = userId + " (Anonim/Gagal Auth)";
-                            showMessage(`Gagal autentikasi: ${anonError.message}. Menggunakan ID anonim sementara.`, 'error');
+                        } else {
+                            // User is explicitly signed out or anonymous sign-in failed previously
+                            userId = crypto.randomUUID(); // Fallback for truly unauthenticated state
+                            if (userIdDisplay) userIdDisplay.textContent = userId + " (Anonim)";
+
+                            // Show login/register, hide logout
+                            if (navLoginBtn) navLoginBtn.classList.remove('hidden');
+                            if (navRegisterBtn) navRegisterBtn.classList.remove('hidden');
+                            if (navLogoutBtn) navLogoutBtn.classList.add('hidden');
+                            if (mobileNavLoginBtn) mobileNavLoginBtn.classList.remove('hidden');
+                            if (mobileNavRegisterBtn) mobileNavRegisterBtn.classList.remove('hidden');
+                            if (mobileNavLogoutBtn) mobileNavLogoutBtn.classList.add('hidden');
                         }
                     }
-                    isAuthReady = true; // Auth state has been checked
+                    isAuthReady = true; // Auth state has been checked at least once
                     setupFirestoreListener(); // Setup Firestore listener after auth state is determined
+                    setupQuizUI(); // Setup quiz UI after auth is ready
                 });
 
             } catch (error) {
@@ -478,7 +599,7 @@
             }
         });
 
-        // Function to set up real-time Firestore listener
+        // Function to set up real-time Firestore listener for Notes
         function setupFirestoreListener() {
             if (!db || !userId || !isAuthReady) {
                 console.warn("Firestore, User ID, atau Auth belum siap. Menunggu...");
@@ -491,13 +612,12 @@
             // Check if elements exist before manipulating them
             if (!notesList || !loadingNotes) {
                 console.error("Elemen 'notesList' atau 'loadingNotes' tidak ditemukan di DOM. Menunda setup listener.");
-                // Optionally, you might want to retry after a short delay here
                 return;
             }
 
             // Public data collection path: /artifacts/{appId}/public/data/{your_collection_name}
             const notesCollectionRef = collection(db, `artifacts/${appId}/public/data/notes`);
-            const q = query(notesCollectionRef); // Removed orderBy to prevent potential index issues
+            const q = query(notesCollectionRef);
 
             onSnapshot(q, (snapshot) => {
                 notesList.innerHTML = ''; // Clear existing notes
@@ -542,7 +662,7 @@
                 await addDoc(collection(db, `artifacts/${appId}/public/data/notes`), {
                     text: noteText,
                     authorId: userId,
-                    timestamp: serverTimestamp() // Use serverTimestamp for consistent time
+                    timestamp: serverTimestamp()
                 });
                 noteInput.value = ''; // Clear input
                 showMessage("Catatan berhasil ditambahkan!");
@@ -552,25 +672,314 @@
             }
         });
 
-        // Smooth scrolling for navigation links
+        // Quiz Functions (unchanged from previous version)
+        function setupQuizUI() {
+            const startQuizBtn = document.getElementById('startQuizBtn');
+            const quizLangSelect = document.getElementById('quizLangSelect');
+            const quizContainer = document.getElementById('quizContainer');
+            const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+            const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+            const finishQuizBtn = document.getElementById('finishQuizBtn');
+            const quizAnswerInput = document.getElementById('quizAnswerInput');
+            const quizFeedback = document.getElementById('quizFeedback');
+            const quizResult = document.getElementById('quizResult');
+            const restartQuizBtn = document.getElementById('restartQuizBtn');
+
+            if (startQuizBtn) startQuizBtn.addEventListener('click', async () => {
+                const selectedLanguage = quizLangSelect.value;
+                if (!selectedLanguage) {
+                    showMessage("Mohon pilih bahasa untuk kuis!", 'error');
+                    return;
+                }
+                await loadQuizQuestions(selectedLanguage);
+            });
+
+            if (submitAnswerBtn) submitAnswerBtn.addEventListener('click', checkAnswer);
+            if (nextQuestionBtn) nextQuestionBtn.addEventListener('click', nextQuestion);
+            if (finishQuizBtn) finishQuizBtn.addEventListener('click', endQuiz);
+            if (restartQuizBtn) restartQuizBtn.addEventListener('click', resetQuiz);
+        }
+
+        async function loadQuizQuestions(language) {
+            if (!db || !isAuthReady) {
+                showMessage("Firebase belum siap. Coba lagi.", 'error');
+                return;
+            }
+
+            const quizCollectionRef = collection(db, `artifacts/${appId}/public/data/quizzes`);
+            try {
+                const q = query(quizCollectionRef, where("language", "==", language));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    showMessage(`Tidak ada pertanyaan kuis untuk bahasa ${language}.`, 'error');
+                    return;
+                }
+
+                let allQuestions = [];
+                querySnapshot.forEach(doc => {
+                    allQuestions.push(doc.data());
+                });
+
+                currentQuizQuestions = shuffleArray(allQuestions).slice(0, QUIZ_QUESTION_LIMIT);
+
+                if (currentQuizQuestions.length === 0) {
+                    showMessage(`Tidak ada cukup pertanyaan kuis untuk bahasa ${language} (${QUIZ_QUESTION_LIMIT} diperlukan).`, 'error');
+                    return;
+                }
+
+                currentQuestionIndex = 0;
+                quizScore = 0;
+                document.getElementById('quizLanguageSelection').classList.add('hidden');
+                document.getElementById('quizContainer').classList.remove('hidden');
+                document.getElementById('quizResult').classList.add('hidden');
+                displayQuestion();
+                showMessage(`Kuis Bahasa ${language} dimulai!`);
+
+            } catch (error) {
+                console.error("Kesalahan memuat pertanyaan kuis:", error);
+                showMessage(`Gagal memuat kuis: ${error.message}`, 'error');
+            }
+        }
+
+        function displayQuestion() {
+            const questionData = currentQuizQuestions[currentQuestionIndex];
+            document.getElementById('currentQuestionNumber').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = QUIZ_QUESTION_LIMIT;
+            document.getElementById('quizQuestion').textContent = questionData.question;
+            document.getElementById('quizAnswerInput').value = '';
+            document.getElementById('quizFeedback').textContent = '';
+
+            document.getElementById('submitAnswerBtn').classList.remove('hidden');
+            document.getElementById('nextQuestionBtn').classList.add('hidden');
+            document.getElementById('finishQuizBtn').classList.add('hidden');
+
+            const quizOptions = document.getElementById('quizOptions');
+            quizOptions.innerHTML = '';
+
+            if (questionData.type === 'multiple_choice' && questionData.options) {
+                document.getElementById('quizAnswerInput').classList.add('hidden');
+                questionData.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.innerHTML = `
+                        <input type="radio" id="option${index}" name="quizOption" value="${option}" class="mr-2">
+                        <label for="option${index}">${option}</label>
+                    `;
+                    quizOptions.appendChild(optionDiv);
+                });
+            } else {
+                document.getElementById('quizAnswerInput').classList.remove('hidden');
+            }
+        }
+
+        function checkAnswer() {
+            const questionData = currentQuizQuestions[currentQuestionIndex];
+            let userAnswer;
+
+            if (questionData.type === 'multiple_choice') {
+                const selectedOption = document.querySelector('input[name="quizOption"]:checked');
+                userAnswer = selectedOption ? selectedOption.value : '';
+            } else {
+                userAnswer = document.getElementById('quizAnswerInput').value.trim();
+            }
+
+            const quizFeedback = document.getElementById('quizFeedback');
+            const correctAnswer = questionData.answer.trim();
+
+            if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+                quizScore++;
+                quizFeedback.textContent = "Benar!";
+                quizFeedback.classList.remove('text-red-600');
+                quizFeedback.classList.add('text-green-600');
+            } else {
+                quizFeedback.textContent = `Salah. Jawaban yang benar adalah: "${correctAnswer}"`;
+                quizFeedback.classList.remove('text-green-600');
+                quizFeedback.classList.add('text-red-600');
+            }
+
+            document.getElementById('submitAnswerBtn').classList.add('hidden');
+            if (currentQuestionIndex < QUIZ_QUESTION_LIMIT - 1) {
+                document.getElementById('nextQuestionBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('finishQuizBtn').classList.remove('hidden');
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < QUIZ_QUESTION_LIMIT) {
+                displayQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('quizResult').classList.remove('hidden');
+            document.getElementById('finalScore').textContent = quizScore;
+            document.getElementById('maxScore').textContent = QUIZ_QUESTION_LIMIT;
+            showMessage(`Kuis selesai! Skor Anda: ${quizScore}/${QUIZ_QUESTION_LIMIT}`);
+        }
+
+        function resetQuiz() {
+            document.getElementById('quizLanguageSelection').classList.remove('hidden');
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('quizResult').classList.add('hidden');
+            document.getElementById('quizLangSelect').value = '';
+            currentQuizQuestions = [];
+            currentQuestionIndex = 0;
+            quizScore = 0;
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // --- Authentication Forms and Logic ---
+        const loginFormSection = document.getElementById('login-form');
+        const registerFormSection = document.getElementById('register-form');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const navLogoutBtn = document.getElementById('navLogoutBtn');
+        const mobileNavLogoutBtn = document.getElementById('mobileNavLogoutBtn');
+
+        function hideAllAuthForms() {
+            if (loginFormSection) loginFormSection.classList.add('hidden');
+            if (registerFormSection) registerFormSection.classList.add('hidden');
+        }
+
+        function showLoginForm() {
+            hideAllAuthForms();
+            if (loginFormSection) loginFormSection.classList.remove('hidden');
+            loginFormSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showRegisterForm() {
+            hideAllAuthForms();
+            if (registerFormSection) registerFormSection.classList.remove('hidden');
+            registerFormSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Event listeners for navigation buttons to show forms
+        document.getElementById('navLoginBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            showLoginForm();
+        });
+        document.getElementById('navRegisterBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            showRegisterForm();
+        });
+        document.getElementById('mobileNavLoginBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            showLoginForm();
+            toggleMobileMenu(); // Close mobile menu after clicking
+        });
+        document.getElementById('mobileNavRegisterBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            showRegisterForm();
+            toggleMobileMenu(); // Close mobile menu after clicking
+        });
+
+
+        // Register User
+        if (registerForm) {
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = registerForm.registerEmail.value;
+                const password = registerForm.registerPassword.value;
+
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    showMessage("Pendaftaran berhasil! Anda sekarang masuk.", 'success');
+                    registerForm.reset();
+                    hideAllAuthForms(); // Hide forms after successful registration
+                } catch (error) {
+                    console.error("Kesalahan pendaftaran:", error);
+                    showMessage(`Gagal mendaftar: ${error.message}`, 'error');
+                }
+            });
+        }
+
+        // Login User
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = loginForm.loginEmail.value;
+                const password = loginForm.loginPassword.value;
+
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showMessage("Berhasil masuk!", 'success');
+                    loginForm.reset();
+                    hideAllAuthForms(); // Hide forms after successful login
+                } catch (error) {
+                    console.error("Kesalahan masuk:", error);
+                    showMessage(`Gagal masuk: ${error.message}`, 'error');
+                }
+            });
+        }
+
+        // Logout User
+        if (navLogoutBtn) {
+            navLogoutBtn.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    showMessage("Berhasil keluar.", 'success');
+                    hideAllAuthForms(); // Ensure forms are hidden after logout
+                } catch (error) {
+                    console.error("Kesalahan keluar:", error);
+                    showMessage(`Gagal keluar: ${error.message}`, 'error');
+                }
+            });
+        }
+
+        if (mobileNavLogoutBtn) {
+            mobileNavLogoutBtn.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    showMessage("Berhasil keluar.", 'success');
+                    hideAllAuthForms(); // Ensure forms are hidden after logout
+                    toggleMobileMenu(); // Close mobile menu after logout
+                } catch (error) {
+                    console.error("Kesalahan keluar:", error);
+                    showMessage(`Gagal keluar: ${error.message}`, 'error');
+                }
+            });
+        }
+
+
+        // Smooth scrolling for navigation links (original logic, but updated to handle new forms)
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                    // Close mobile menu if open
-                    if (mobileMenu.classList.contains('active')) {
-                        toggleMobileMenu();
+                const href = this.getAttribute('href');
+                if (href === '#login-form') {
+                    e.preventDefault();
+                    showLoginForm();
+                } else if (href === '#register-form') {
+                    e.preventDefault();
+                    showRegisterForm();
+                } else {
+                    // Default smooth scroll for other sections
+                    e.preventDefault();
+                    const targetElement = document.querySelector(href);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                        if (mobileMenu.classList.contains('active')) {
+                            toggleMobileMenu();
+                        }
                     }
                 }
             });
         });
 
-        // Mobile menu toggle
+        // Mobile menu toggle (unchanged from previous version)
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         const closeMobileMenuButton = document.getElementById('close-mobile-menu');
@@ -579,19 +988,24 @@
         function toggleMobileMenu() {
             mobileMenu.classList.toggle('active');
             mobileMenuOverlay.classList.toggle('active');
-            document.body.classList.toggle('overflow-hidden'); // Prevent scrolling when mobile menu is open
+            document.body.classList.toggle('overflow-hidden');
         }
 
         mobileMenuButton.addEventListener('click', toggleMobileMenu);
         closeMobileMenuButton.addEventListener('click', toggleMobileMenu);
-        mobileMenuOverlay.addEventListener('click', toggleMobileMenu); // Close when clicking overlay
+        mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
 
-        // Close mobile menu when a link inside it is clicked
         mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', toggleMobileMenu);
+            link.addEventListener('click', (e) => {
+                // Only toggle if it's not a login/register link handled by specific functions
+                const href = link.getAttribute('href');
+                if (href !== '#login-form' && href !== '#register-form') {
+                    toggleMobileMenu();
+                }
+            });
         });
 
-        // Intersection Observer for fade-in animations
+        // Intersection Observer for fade-in animations (unchanged from previous version)
         const observerOptions = {
             root: null,
             rootMargin: '0px',
@@ -601,13 +1015,11 @@
         const observer = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    // Check if animation classes already exist to prevent re-triggering
                     if (!entry.target.classList.contains('animated')) {
-                        entry.target.classList.add('fade-in'); // Add a class that triggers animation
-                        // Removed manual style manipulation as animation should handle it
-                        entry.target.classList.add('animated'); // Mark as animated
+                        entry.target.classList.add('fade-in');
+                        entry.target.classList.add('animated');
                     }
-                    observer.unobserve(entry.target); // Stop observing once animated
+                    observer.unobserve(entry.target);
                 }
             });
         }, observerOptions);
@@ -616,22 +1028,21 @@
             observer.observe(el);
         });
 
-        // Placeholder for Audio Pronunciation
+        // Placeholder for Audio Pronunciation (unchanged from previous version)
         function playAudio(text) {
             console.log(`Playing audio for: "${text}"`);
             if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-US'; // Or appropriate language
+                utterance.lang = 'en-US';
                 window.speechSynthesis.speak(utterance);
             } else {
-                showMessage('Browser Anda tidak mendukung Web Speech API.', 'error'); // Using showMessage
+                showMessage('Browser Anda tidak mendukung Web Speech API.', 'error');
             }
         }
 
-        // PWA: Register Service Worker
+        // PWA: Register Service Worker (unchanged from previous version, still using absolute URL construction)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // Construct full URL for service worker to avoid protocol issues in some environments
                 const serviceWorkerUrl = new URL('service-worker.js', location.href).href;
                 navigator.serviceWorker.register(serviceWorkerUrl, { scope: './' })
                     .then(registration => {
