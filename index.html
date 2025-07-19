@@ -506,8 +506,10 @@
 
         // Function to display messages (instead of alert())
         function showMessage(message, type = 'success') {
+            console.log("showMessage called:", message, type); // Diagnostik
             const messageBox = document.getElementById('messageBox');
             if (messageBox) {
+                console.log("messageBox found. Displaying message."); // Diagnostik
                 messageBox.textContent = message;
                 messageBox.className = 'message-box'; // Reset classes
                 if (type === 'error') {
@@ -518,22 +520,24 @@
                     messageBox.classList.remove('active'); // Hide message
                 }, 3000);
             } else {
-                console.warn("Message box element not found:", message);
+                console.warn("Message box element not found:", message); // Diagnostik
             }
         }
 
         // Initialize Firebase and set up authentication
         window.addEventListener('DOMContentLoaded', async () => {
-            try {
+            try { // Broader try-catch for overall initialization
+                console.log("DOMContentLoaded fired. Starting app initialization."); // Diagnostik
+
                 if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
                     showMessage("Firebase config tidak ditemukan atau tidak lengkap. Pastikan '__firebase_config' tersedia.", 'error');
                     console.error("Firebase config is missing or incomplete:", firebaseConfig);
-                    return;
+                    // Tidak return di sini agar bagian non-Firebase tetap bisa diinisialisasi
+                } else {
+                    app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
                 }
-
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
 
                 // Listen for auth state changes
                 onAuthStateChanged(auth, async (user) => {
@@ -560,7 +564,7 @@
 
                     } else {
                         // If no user is signed in, try anonymous sign-in (only once on load)
-                        if (!isAuthReady) { // Only attempt anonymous sign-in if auth state hasn't been fully determined yet
+                        if (!isAuthReady && auth) { // Only attempt anonymous sign-in if auth state hasn't been fully determined yet AND auth is initialized
                             try {
                                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -589,13 +593,18 @@
                         }
                     }
                     isAuthReady = true; // Auth state has been checked at least once
-                    setupFirestoreListener(); // Setup Firestore listener after auth state is determined
-                    setupQuizUI(); // Setup quiz UI after auth is ready
+                    // Hanya panggil setupFirestoreListener dan setupQuizUI jika Firebase berhasil diinisialisasi
+                    if (db && auth) {
+                        setupFirestoreListener();
+                        setupQuizUI();
+                    } else {
+                        console.warn("Firebase tidak diinisialisasi. Fitur yang bergantung pada Firebase mungkin tidak berfungsi.");
+                    }
                 });
 
             } catch (error) {
-                console.error("Kesalahan inisialisasi Firebase atau autentikasi:", error);
-                showMessage(`Kesalahan inisialisasi: ${error.message}`, 'error');
+                console.error("Kesalahan umum saat inisialisasi aplikasi:", error); // Tangkap error umum
+                showMessage(`Kesalahan umum: ${error.message}`, 'error');
             }
         });
 
@@ -644,33 +653,37 @@
         }
 
         // Add Note functionality
-        document.getElementById('addNoteBtn').addEventListener('click', async () => {
-            const noteInput = document.getElementById('noteInput');
-            const noteText = noteInput.value.trim();
+        const addNoteBtn = document.getElementById('addNoteBtn');
+        if (addNoteBtn) { // Pastikan tombol ada
+            addNoteBtn.addEventListener('click', async () => {
+                const noteInput = document.getElementById('noteInput');
+                const noteText = noteInput ? noteInput.value.trim() : '';
 
-            if (noteText === '') {
-                showMessage("Catatan tidak boleh kosong!", 'error');
-                return;
-            }
+                if (noteText === '') {
+                    showMessage("Catatan tidak boleh kosong!", 'error');
+                    return;
+                }
 
-            if (!db || !userId || !isAuthReady) {
-                showMessage("Firebase belum siap atau ID pengguna tidak ada. Coba lagi.", 'error');
-                return;
-            }
+                if (!db || !userId || !isAuthReady) {
+                    showMessage("Firebase belum siap atau ID pengguna tidak ada. Coba lagi.", 'error');
+                    return;
+                }
 
-            try {
-                await addDoc(collection(db, `artifacts/${appId}/public/data/notes`), {
-                    text: noteText,
-                    authorId: userId,
-                    timestamp: serverTimestamp()
-                });
-                noteInput.value = ''; // Clear input
-                showMessage("Catatan berhasil ditambahkan!");
-            } catch (error) {
-                console.error("Kesalahan menambahkan catatan:", error);
-                showMessage(`Gagal menambahkan catatan: ${error.message}`, 'error');
-            }
-        });
+                try {
+                    await addDoc(collection(db, `artifacts/${appId}/public/data/notes`), {
+                        text: noteText,
+                        authorId: userId,
+                        timestamp: serverTimestamp()
+                    });
+                    if (noteInput) noteInput.value = ''; // Clear input
+                    showMessage("Catatan berhasil ditambahkan!");
+                } catch (error) {
+                    console.error("Kesalahan menambahkan catatan:", error);
+                    showMessage(`Gagal menambahkan catatan: ${error.message}`, 'error');
+                }
+            });
+        }
+
 
         // Quiz Functions
         function setupQuizUI() {
@@ -1057,12 +1070,6 @@
         const closeMobileMenuButton = document.getElementById('close-mobile-menu');
         const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
 
-        function toggleMobileMenu() {
-            mobileMenu.classList.toggle('active');
-            mobileMenuOverlay.classList.toggle('active');
-            document.body.classList.toggle('overflow-hidden');
-        }
-
         if (mobileMenuButton) mobileMenuButton.addEventListener('click', toggleMobileMenu);
         if (closeMobileMenuButton) closeMobileMenuButton.addEventListener('click', toggleMobileMenu);
         if (mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
@@ -1130,8 +1137,10 @@
         }
 
         // --- New: Course Button Functionality ---
+        console.log("Attaching event listeners for course buttons."); // Diagnostik
         document.querySelectorAll('.view-course-btn').forEach(button => {
             button.addEventListener('click', function() {
+                console.log("Lihat Kursus button clicked for language:", this.dataset.lang); // Diagnostik
                 const language = this.dataset.lang; // Get language from data-lang attribute
                 if (language) {
                     showMessage(`Anda memilih kursus Bahasa ${language}!`, 'success');
