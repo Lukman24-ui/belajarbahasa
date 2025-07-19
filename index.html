@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloosed Hub - Belajar Bahasa Modern</title>
+    <meta name="description" content="Website interaktif untuk belajar bahasa modern seperti Inggris, Jepang, Korea, dan lainnya. Dilengkapi kursus, kuis, flashcard, dan fitur komunitas.">
+    <meta name="keywords" content="belajar bahasa, kursus bahasa, bahasa Inggris, bahasa Jepang, bahasa Korea, flashcard, kuis, pronunciation, gamifikasi, komunitas bahasa">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- PWA: Link to manifest.json -->
+    <link rel="manifest" href="/manifest.json">
+    <!-- PWA: Theme color for browser UI -->
+    <meta name="theme-color" content="#4F46E5">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light background */
+            color: #333;
+            scroll-behavior: smooth;
+        }
+        .section-padding {
+            padding: 4rem 1rem;
+        }
+        @media (min-width: 768px) {
+            .section-padding {
+                padding: 6rem 4rem;
+            }
+        }
+        .card {
+            @apply bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl hover:scale-105;
+        }
+        .btn-primary {
+            @apply bg-indigo-600 text-white font-semibold py-3 px-6 rounded-full shadow-md hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105;
+        }
+        .btn-secondary {
+            @apply bg-white text-indigo-600 border border-indigo-600 font-semibold py-3 px-6 rounded-full shadow-md hover:bg-indigo-50 transition-all duration-300 transform hover:scale-105;
+        }
+        .nav-link {
+            @apply text-gray-700 hover:text-indigo-600 transition-colors duration-200;
+        }
+        .feature-icon {
+            @apply text-indigo-500 text-4xl mb-4;
+        }
+        /* Custom animations */
+        .fade-in {
+            animation: fadeIn 1s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in-left {
+            animation: slideInLeft 1s ease-out forwards;
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .slide-in-right {
+            animation: slideInRight 1s ease-out forwards;
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+        .delay-4 { animation-delay: 0.8s; }
+
+        /* Mobile menu specific styles */
+        .mobile-menu {
+            display: none; /* Hidden by default */
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%); /* Start off-screen */
+        }
+        .mobile-menu.active {
+            display: flex; /* Show when active */
+            transform: translateX(0); /* Slide into view */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navigation Bar -->
+    <header class="bg-white shadow-sm py-4 px-6 md:px-12 sticky top-0 z-50">
+        <nav class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-indigo-600 flex items-center">
+                <!-- Logo here - Increased size for better visibility -->
+                <img src="./images/logo.png" alt="Cloosed Hub Logo" class="h-10 w-10 mr-3 rounded-full">
+                Cloosed Hub
+            </a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#home" class="nav-link">Beranda</a>
+                <a href="#features" class="nav-link">Fitur</a>
+                <a href="#courses" class="nav-link">Kursus</a>
+                <a href="#community" class="nav-link">Komunitas</a>
+                <a href="#contact" class="nav-link">Kontak</a>
+                <a href="#login" class="btn-secondary ml-4">Masuk</a>
+                <a href="#register" class="btn-primary">Daftar</a>
+            </div>
+            <!-- Mobile Menu Button -->
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-600 hover:text-indigo-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-64 bg-white shadow-lg flex flex-col items-center pt-20 space-y-6 md:hidden z-50">
+            <button id="close-mobile-menu" class="absolute top-4 right-4 text-gray-600 hover:text-indigo-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <a href="#home" class="nav-link text-lg" onclick="toggleMobileMenu()">Beranda</a>
+            <a href="#features" class="nav-link text-lg" onclick="toggleMobileMenu()">Fitur</a>
+            <a href="#courses" class="nav-link text-lg" onclick="toggleMobileMenu()">Kursus</a>
+            <a href="#community" class="nav-link text-lg" onclick="toggleMobileMenu()">Komunitas</a>
+            <a href="#contact" class="nav-link text-lg" onclick="toggleMobileMenu()">Kontak</a>
+            <a href="#login" class="btn-secondary w-4/5 text-center" onclick="toggleMobileMenu()">Masuk</a>
+            <a href="#register" class="btn-primary w-4/5 text-center" onclick="toggleMobileMenu()">Daftar</a>
+        </div>
+    </header>
+
+    <!-- Hero Section (Beranda) -->
+    <section id="home" class="section-padding bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-center">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-center">
+            <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8 text-left">
+                <h1 class="text-4xl md:text-5xl font-extrabold leading-tight mb-4 fade-in">
+                    Kuasai Bahasa Baru, Buka Dunia Baru!
+                </h1>
+                <p class="text-lg md:text-xl mb-8 fade-in delay-1">
+                    Cloosed Hub adalah platform interaktif untuk belajar bahasa modern dengan cara yang menyenangkan dan efektif.
+                </p>
+                <a href="#courses" class="btn-primary inline-block fade-in delay-2">Mulai Belajar Sekarang!</a>
+            </div>
+            <div class="md:w-1/2 flex justify-center fade-in delay-3">
+                <!-- Illustration for language learning -->
+                <img src="./images/Gemini_Generated_Image_4j7kjo4j7kjo4j7k.jpg" alt="Ilustrasi pembelajaran bahasa dengan konsep vektor dan matematika" class="rounded-xl shadow-2xl max-w-full h-auto">
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section-padding bg-white">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-12 fade-in">Fitur Unggulan Kami</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1: Kursus Interaktif -->
+                <div class="card fade-in delay-1">
+                    <div class="feature-icon">📚</div>
+                    <h3 class="text-xl font-semibold mb-2">Kursus Interaktif</h3>
+                    <p class="text-gray-600">Belajar dengan teks, audio, dan video. Progres belajar Anda tersimpan otomatis.</p>
+                </div>
+                <!-- Feature 2: Latihan Vocabulary -->
+                <div class="card fade-in delay-2">
+                    <div class="feature-icon">📇</div>
+                    <h3 class="text-xl font-semibold mb-2">Latihan Vocabulary</h3>
+                    <p class="text-gray-600">Perkaya kosakata Anda dengan flashcard interaktif yang mudah diingat.</p>
+                </div>
+                <!-- Feature 3: Quiz & Ujian -->
+                <div class="card fade-in delay-3">
+                    <div class="feature-icon">📝</div>
+                    <h3 class="text-xl font-semibold mb-2">Quiz & Ujian</h3>
+                    <p class="text-gray-600">Uji pemahaman Anda dengan soal pilihan ganda dan dapatkan jawaban instan.</p>
+                </div>
+                <!-- Feature 4: Audio Pronunciation -->
+                <div class="card fade-in delay-4">
+                    <div class="feature-icon">🗣️</div>
+                    <h3 class="text-xl font-semibold mb-2">Audio Pronunciation</h3>
+                    <p class="text-gray-600">Dengarkan contoh pelafalan kata yang akurat untuk meningkatkan aksen Anda.</p>
+                </div>
+                <!-- Feature 5: Gamifikasi Menarik -->
+                <div class="card fade-in delay-1">
+                    <div class="feature-icon">🏆</div>
+                    <h3 class="text-xl font-semibold mb-2">Gamifikasi Menarik</h3>
+                    <p class="text-gray-600">Dapatkan poin, naiki leaderboard, dan kumpulkan badge pencapaian.</p>
+                </div>
+                <!-- Feature 6: Komunitas Aktif -->
+                <div class="card fade-in delay-2">
+                    <div class="feature-icon">💬</div>
+                    <h3 class="text-xl font-semibold mb-2">Komunitas Aktif</h3>
+                    <p class="text-gray-600">Berdiskusi dengan sesama pembelajar di forum dan ikuti tantangan mingguan.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section id="courses" class="section-padding bg-gray-100">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-12 fade-in">Pilih Bahasa Favorit Anda</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Course Card: English -->
+                <div class="card fade-in delay-1">
+                    <img src="https://flagcdn.com/w320/us.png" alt="Bendera Amerika Serikat - Kursus Bahasa Inggris" class="rounded-lg mb-4 w-full h-auto">
+                    <h3 class="text-xl font-semibold mb-2">Bahasa Inggris</h3>
+                    <p class="text-gray-600 mb-4">Mulai dari dasar hingga mahir, tingkatkan kemampuan speaking, listening, reading, dan writing Anda.</p>
+                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                </div>
+                <!-- Course Card: Japanese -->
+                <div class="card fade-in delay-2">
+                    <img src="https://flagcdn.com/w320/jp.png" alt="Bendera Jepang - Kursus Bahasa Jepang" class="rounded-lg mb-4 w-full h-auto">
+                    <h3 class="text-xl font-semibold mb-2">Bahasa Jepang</h3>
+                    <p class="text-gray-600 mb-4">Pelajari Hiragana, Katakana, Kanji, dan percakapan sehari-hari untuk perjalanan atau bisnis.</p>
+                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                </div>
+                <!-- Course Card: Korean -->
+                <div class="card fade-in delay-3">
+                    <img src="https://flagcdn.com/w320/kr.png" alt="Bendera Korea Selatan - Kursus Bahasa Korea" class="rounded-lg mb-4 w-full h-auto">
+                    <h3 class="text-xl font-semibold mb-2">Bahasa Korea</h3>
+                    <p class="text-gray-600 mb-4">Kuasai Hangul dan frasa penting untuk K-Pop, K-Drama, atau studi di Korea.</p>
+                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                </div>
+                <!-- Add more languages as needed -->
+                <div class="card fade-in delay-4">
+                    <img src="https://flagcdn.com/w320/cn.png" alt="Bendera Tiongkok - Kursus Bahasa Mandarin" class="rounded-lg mb-4 w-full h-auto">
+                    <h3 class="text-xl font-semibold mb-2">Bahasa Mandarin</h3>
+                    <p class="text-gray-600 mb-4">Pelajari Pinyin, karakter dasar, dan percakapan bisnis atau budaya.</p>
+                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                </div>
+                <div class="card fade-in delay-1">
+                    <img src="https://flagcdn.com/w320/de.png" alt="Bendera Jerman - Kursus Bahasa Jerman" class="rounded-lg mb-4 w-full h-auto">
+                    <h3 class="text-xl font-semibold mb-2">Bahasa Jerman</h3>
+                    <p class="text-gray-600 mb-4">Jelajahi tata bahasa, kosakata, dan budaya Jerman untuk studi atau pekerjaan.</p>
+                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                </div>
+                <div class="card fade-in delay-2">
+                    <img src="https://flagcdn.com/w320/es.png" alt="Bendera Spanyol - Kursus Bahasa Spanyol" class="rounded-lg mb-4 w-full h-auto">
+                    <h3 class="text-xl font-semibold mb-2">Bahasa Spanyol</h3>
+                    <p class="text-gray-600 mb-4">Pelajari bahasa romantis ini untuk bepergian, bekerja, atau sekadar bersenang-senang.</p>
+                    <a href="#" class="btn-primary text-sm">Lihat Kursus</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gamification Section -->
+    <section id="gamification" class="section-padding bg-indigo-500 text-white text-center">
+        <div class="container mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12 fade-in">Tingkatkan Motivasi dengan Gamifikasi!</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card bg-indigo-600 text-white fade-in delay-1">
+                    <div class="feature-icon">🏅</div>
+                    <h3 class="text-xl font-semibold mb-2">Leaderboard & Point System</h3>
+                    <p class="text-gray-200">Bersaing dengan teman-teman dan lihat posisi Anda di leaderboard global. Dapatkan poin untuk setiap pelajaran yang diselesaikan dan kuis yang dijawab.</p>
+                </div>
+                <div class="card bg-indigo-600 text-white fade-in delay-2">
+                    <div class="feature-icon">🌟</div>
+                    <h3 class="text-xl font-semibold mb-2">Badge & Pencapaian</h3>
+                    <p class="text-gray-200">Kumpulkan badge unik untuk setiap milestone yang Anda capai, dari menyelesaikan level hingga menguasai kosakata baru.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section id="community" class="section-padding bg-white">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-12 fade-in">Bergabunglah dengan Komunitas Kami</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card fade-in delay-1">
+                    <div class="feature-icon">🗣️</div>
+                    <h3 class="text-xl font-semibold mb-2">Forum Diskusi Aktif</h3>
+                    <p class="text-gray-600">Ajukan pertanyaan, bagikan tips, dan berinteraksi dengan sesama pembelajar dari seluruh dunia.</p>
+                    <a href="#" class="btn-secondary mt-4">Kunjungi Forum</a>
+                </div>
+                <div class="card fade-in delay-2">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="text-xl font-semibold mb-2">Tantangan Belajar Mingguan</h3>
+                    <p class="text-gray-600">Ikuti tantangan seru setiap minggu untuk menguji kemampuan Anda dan memenangkan hadiah.</p>
+                    <a href="#" class="btn-secondary mt-4">Ikuti Tantangan</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Placeholder Section -->
+    <section id="dashboard" class="section-padding bg-gray-100">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-12 fade-in">Dashboard Anda</h2>
+            <div class="bg-white rounded-xl shadow-lg p-8 fade-in delay-1">
+                <p class="text-lg text-gray-700 mb-4">
+                    Setelah masuk, Anda akan memiliki akses ke dashboard pribadi untuk melacak progres belajar, melihat skor kuis, dan menemukan materi terbaru.
+                </p>
+                <img src="https://placehold.co/600x300/a78bfa/ffffff?text=Tampilan+Dashboard" alt="Tampilan Dashboard" class="rounded-lg shadow-md mx-auto max-w-full h-auto mb-6">
+                <a href="#login" class="btn-primary">Masuk ke Dashboard</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login/Register Section -->
+    <section id="login" class="section-padding bg-indigo-600 text-white">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8 fade-in">Mulai Petualangan Belajar Anda</h2>
+            <p class="text-lg mb-8 fade-in delay-1">Daftar atau masuk untuk menyimpan progres belajar Anda dan mengakses semua fitur premium.</p>
+            <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
+                <a href="#" class="btn-secondary bg-white text-indigo-600 fade-in delay-2">Masuk</a>
+                <a href="#" class="btn-primary fade-in delay-3">Daftar Sekarang</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-gray-800 text-gray-300 py-10 px-6 md:px-12">
+        <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-xl font-semibold text-white mb-4">Cloosed Hub</h3>
+                <p class="text-sm">Platform terbaik untuk menguasai bahasa baru dengan cara yang interaktif dan menyenangkan.</p>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold text-white mb-4">Kontak Kami</h3>
+                <p class="text-sm">Email: info@cloosedhub.com</p>
+                <p class="text-sm">Telepon: +62 812 3456 7890</p>
+                <p class="text-sm">Alamat: Jl. Belajar Bahasa No. 123, Jakarta, Indonesia</p>
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold text-white mb-4">Ikuti Kami</h3>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">Facebook</a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">Twitter</a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">Instagram</a>
+                    <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center text-sm text-gray-500 mt-8">
+            &copy; 2025 Cloosed Hub. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const closeMobileMenuButton = document.getElementById('close-mobile-menu');
+
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('active');
+            // Prevent scrolling when mobile menu is open
+            document.body.classList.toggle('overflow-hidden');
+        }
+
+        mobileMenuButton.addEventListener('click', toggleMobileMenu);
+        closeMobileMenuButton.addEventListener('click', toggleMobileMenu);
+
+        // Close mobile menu when a link inside it is clicked
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', toggleMobileMenu);
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in'); // Add a class that triggers animation
+                    entry.target.style.opacity = '1'; // Ensure it's visible after animation
+                    entry.target.style.transform = 'translateY(0)'; // Ensure it's in final position
+                    observer.unobserve(entry.target); // Stop observing once animated
+                }
+            });
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Placeholder for future JavaScript functionalities
+        // Example: Flashcard logic (simplified)
+        function createFlashcard(word, translation) {
+            const flashcardContainer = document.createElement('div');
+            flashcardContainer.className = 'card bg-blue-100 p-4 rounded-lg cursor-pointer transform transition-transform duration-300 hover:scale-105';
+            flashcardContainer.innerHTML = `
+                <p class="text-2xl font-bold text-blue-800 text-center" data-side="front">${word}</p>
+                <p class="text-xl text-blue-600 text-center hidden" data-side="back">${translation}</p>
+            `;
+            flashcardContainer.addEventListener('click', () => {
+                const front = flashcardContainer.querySelector('[data-side="front"]');
+                const back = flashcardContainer.querySelector('[data-side="back"]');
+                front.classList.toggle('hidden');
+                back.classList.toggle('hidden');
+            });
+            return flashcardContainer;
+        }
+
+        // You would typically fetch these from a database
+        const vocabularyWords = [
+            { word: "Hello", translation: "Halo" },
+            { word: "Thank you", translation: "Terima kasih" },
+            { word: "Please", translation: "Tolong" },
+            { word: "Goodbye", translation: "Sampai jumpa" }
+        ];
+
+        // Example of how you might render flashcards (e.g., in a dedicated section)
+        // const vocabularySection = document.getElementById('vocabulary-section'); // Assuming you add this section
+        // if (vocabularySection) {
+        //     vocabularyWords.forEach(item => {
+        //         vocabularySection.appendChild(createFlashcard(item.word, item.translation));
+        //     });
+        // }
+
+        // Placeholder for Audio Pronunciation
+        function playAudio(text) {
+            // In a real application, you'd use a text-to-speech API or pre-recorded audio files
+            console.log(`Playing audio for: "${text}"`);
+            // Example using Web Speech API (limited browser support for some voices)
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US'; // Or appropriate language
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Browser Anda tidak mendukung Web Speech API.');
+            }
+        }
+
+        // Example usage: <button onclick="playAudio('Hello')">Play</button>
+
+        // PWA: Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
