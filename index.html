@@ -526,86 +526,115 @@
 
         // Initialize Firebase and set up authentication
         window.addEventListener('DOMContentLoaded', async () => {
+            console.log("DOMContentLoaded fired. Initializing Firebase..."); // Diagnostik
             try { // Broader try-catch for overall initialization
-                console.log("DOMContentLoaded fired. Starting app initialization."); // Diagnostik
-
-                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
-                    showMessage("Firebase config tidak ditemukan atau tidak lengkap. Pastikan '__firebase_config' tersedia.", 'error');
-                    console.error("Firebase config is missing or incomplete:", firebaseConfig);
-                    // Tidak return di sini agar bagian non-Firebase tetap bisa diinisialisasi
+                // Check if firebaseConfig is truly available and valid
+                if (typeof __firebase_config === 'undefined' || Object.keys(JSON.parse(__firebase_config)).length === 0 || !JSON.parse(__firebase_config).apiKey) {
+                    showMessage("Firebase config tidak ditemukan atau tidak lengkap. Mohon pastikan Anda telah menyediakan konfigurasi Firebase yang valid di lingkungan Canvas.", 'error');
+                    console.error("Firebase config is missing or incomplete:", typeof __firebase_config === 'undefined' ? 'undefined' : JSON.parse(__firebase_config));
+                    // Do NOT initialize Firebase objects if config is bad.
+                    // This allows non-Firebase related JS to run without errors from undefined 'auth'.
                 } else {
-                    app = initializeApp(firebaseConfig);
+                    const parsedFirebaseConfig = JSON.parse(__firebase_config);
+                    app = initializeApp(parsedFirebaseConfig);
                     db = getFirestore(app);
                     auth = getAuth(app);
-                }
 
-                // Listen for auth state changes
-                onAuthStateChanged(auth, async (user) => {
-                    const navLoginBtn = document.getElementById('navLoginBtn');
-                    const navRegisterBtn = document.getElementById('navRegisterBtn');
-                    const navLogoutBtn = document.getElementById('navLogoutBtn');
-                    const mobileNavLoginBtn = document.getElementById('mobileNavLoginBtn');
-                    const mobileNavRegisterBtn = document.getElementById('mobileNavRegisterBtn');
-                    const mobileNavLogoutBtn = document.getElementById('mobileNavLogoutBtn');
-                    const userIdDisplay = document.getElementById('userIdDisplay');
+                    // Now that 'auth' is initialized, set up the listener
+                    onAuthStateChanged(auth, async (user) => {
+                        const navLoginBtn = document.getElementById('navLoginBtn');
+                        const navRegisterBtn = document.getElementById('navRegisterBtn');
+                        const navLogoutBtn = document.getElementById('navLogoutBtn');
+                        const mobileNavLoginBtn = document.getElementById('mobileNavLoginBtn');
+                        const mobileNavRegisterBtn = document.getElementById('mobileNavRegisterBtn');
+                        const mobileNavLogoutBtn = document.getElementById('mobileNavLogoutBtn');
+                        const userIdDisplay = document.getElementById('userIdDisplay');
 
-                    if (user) {
-                        userId = user.uid;
-                        if (userIdDisplay) userIdDisplay.textContent = userId;
-                        console.log("Pengguna terautentikasi:", userId);
+                        if (user) {
+                            userId = user.uid;
+                            if (userIdDisplay) userIdDisplay.textContent = userId;
+                            console.log("Pengguna terautentikasi:", userId);
 
-                        // Show logout, hide login/register
-                        if (navLoginBtn) navLoginBtn.classList.add('hidden');
-                        if (navRegisterBtn) navRegisterBtn.classList.add('hidden');
-                        if (navLogoutBtn) navLogoutBtn.classList.remove('hidden');
-                        if (mobileNavLoginBtn) mobileNavLoginBtn.classList.add('hidden');
-                        if (mobileNavRegisterBtn) mobileNavRegisterBtn.classList.add('hidden');
-                        if (mobileNavLogoutBtn) mobileNavLogoutBtn.classList.remove('hidden');
+                            // Show logout, hide login/register
+                            if (navLoginBtn) navLoginBtn.classList.add('hidden');
+                            if (navRegisterBtn) navRegisterBtn.classList.add('hidden');
+                            if (navLogoutBtn) navLogoutBtn.classList.remove('hidden');
+                            if (mobileNavLoginBtn) mobileNavLoginBtn.classList.add('hidden');
+                            if (mobileNavRegisterBtn) mobileNavRegisterBtn.classList.add('hidden');
+                            if (mobileNavLogoutBtn) mobileNavLogoutBtn.classList.remove('hidden');
 
-                    } else {
-                        // If no user is signed in, try anonymous sign-in (only once on load)
-                        if (!isAuthReady && auth) { // Only attempt anonymous sign-in if auth state hasn't been fully determined yet AND auth is initialized
-                            try {
-                                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                                    await signInWithCustomToken(auth, __initial_auth_token);
-                                } else {
-                                    await signInAnonymously(auth);
-                                }
-                                // onAuthStateChanged will be triggered again with the anonymous user
-                            } catch (anonError) {
-                                console.error("Kesalahan saat mencoba masuk anonim:", anonError);
-                                userId = crypto.randomUUID(); // Fallback to a random ID if anonymous sign-in fails
-                                if (userIdDisplay) userIdDisplay.textContent = userId + " (Anonim/Gagal Auth)";
-                                showMessage(`Gagal autentikasi: ${anonError.message}. Menggunakan ID anonim sementara.`, 'error');
-                            }
                         } else {
-                            // User is explicitly signed out or anonymous sign-in failed previously
-                            userId = crypto.randomUUID(); // Fallback for truly unauthenticated state
-                            if (userIdDisplay) userIdDisplay.textContent = userId + " (Anonim)";
+                            // If no user is signed in, try anonymous sign-in (only once on load)
+                            if (!isAuthReady) { // Only attempt anonymous sign-in if auth state hasn't been fully determined yet
+                                try {
+                                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                        await signInWithCustomToken(auth, __initial_auth_token);
+                                    } else {
+                                        await signInAnonymously(auth);
+                                    }
+                                    // onAuthStateChanged will be triggered again with the anonymous user
+                                } catch (anonError) {
+                                    console.error("Kesalahan saat mencoba masuk anonim:", anonError);
+                                    userId = crypto.randomUUID(); // Fallback to a random ID if anonymous sign-in fails
+                                    if (userIdDisplay) userIdDisplay.textContent = userId + " (Anonim/Gagal Auth)";
+                                    showMessage(`Gagal autentikasi: ${anonError.message}. Menggunakan ID anonim sementara.`, 'error');
+                                }
+                            } else {
+                                // User is explicitly signed out or anonymous sign-in failed previously
+                                userId = crypto.randomUUID(); // Fallback for truly unauthenticated state
+                                if (userIdDisplay) userIdDisplay.textContent = userId + " (Anonim)";
 
-                            // Show login/register, hide logout
-                            if (navLoginBtn) navLoginBtn.classList.remove('hidden');
-                            if (navRegisterBtn) navRegisterBtn.classList.remove('hidden');
-                            if (navLogoutBtn) navLogoutBtn.classList.add('hidden');
-                            if (mobileNavLoginBtn) mobileNavLoginBtn.classList.remove('hidden');
-                            if (mobileNavRegisterBtn) mobileNavRegisterBtn.classList.remove('hidden');
-                            if (mobileNavLogoutBtn) mobileNavLogoutBtn.classList.add('hidden');
+                                // Show login/register, hide logout
+                                if (navLoginBtn) navLoginBtn.classList.remove('hidden');
+                                if (navRegisterBtn) navRegisterBtn.classList.remove('hidden');
+                                if (navLogoutBtn) navLogoutBtn.classList.add('hidden');
+                                if (mobileNavLoginBtn) mobileNavLoginBtn.classList.remove('hidden');
+                                if (mobileNavRegisterBtn) mobileNavRegisterBtn.classList.remove('hidden');
+                                if (mobileNavLogoutBtn) mobileNavLogoutBtn.classList.add('hidden');
+                            }
+                        }
+                        isAuthReady = true; // Auth state has been checked at least once
+                        setupFirestoreListener(); // Setup Firestore listener after auth state is determined
+                        setupQuizUI(); // Setup quiz UI after auth is ready
+                    });
+
+                    // Attempt initial anonymous sign-in if auth is ready and no user is logged in yet
+                    // This needs to be outside onAuthStateChanged to handle initial state, but only if auth is defined
+                    if (!auth.currentUser) { // Check if no user is already signed in
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
                         }
                     }
-                    isAuthReady = true; // Auth state has been checked at least once
-                    // Hanya panggil setupFirestoreListener dan setupQuizUI jika Firebase berhasil diinisialisasi
-                    if (db && auth) {
-                        setupFirestoreListener();
-                        setupQuizUI();
-                    } else {
-                        console.warn("Firebase tidak diinisialisasi. Fitur yang bergantung pada Firebase mungkin tidak berfungsi.");
-                    }
-                });
+                }
 
             } catch (error) {
-                console.error("Kesalahan umum saat inisialisasi aplikasi:", error); // Tangkap error umum
+                console.error("Kesalahan umum saat inisialisasi aplikasi atau autentikasi awal:", error); // Tangkap error umum
                 showMessage(`Kesalahan umum: ${error.message}`, 'error');
             }
+
+            // --- Course Button Functionality (Ensure this is always attached) ---
+            console.log("Attaching event listeners to .view-course-btn..."); // Diagnostik
+            document.querySelectorAll('.view-course-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const language = this.dataset.lang; // Get language from data-lang attribute
+                    console.log(`[view-course-btn] Button clicked for language: ${language}`); // Diagnostik
+                    if (language) {
+                        showMessage(`Anda memilih kursus Bahasa ${language}!`, 'success');
+                        // --- IDE UNTUK PENGEMBANGAN LEBIH LANJUT ---
+                        // Di sini Anda bisa:
+                        // 1. Mengarahkan pengguna ke halaman kursus spesifik:
+                        //    window.location.href = `courses/${language.toLowerCase()}.html`;
+                        // 2. Memuat konten kursus secara dinamis di halaman yang sama (misalnya dari Firestore):
+                        //    loadCourseContent(language);
+                        // 3. Menampilkan modal dengan detail kursus.
+                        // 4. Mengarahkan ke bagian kuis harian untuk bahasa tersebut (jika ada kuis yang spesifik).
+                    } else {
+                        showMessage('Bahasa kursus tidak ditemukan.', 'error');
+                    }
+                });
+            });
         });
 
         // Function to set up real-time Firestore listener for Notes
@@ -1070,6 +1099,12 @@
         const closeMobileMenuButton = document.getElementById('close-mobile-menu');
         const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
 
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('active');
+            mobileMenuOverlay.classList.toggle('active');
+            document.body.classList.toggle('overflow-hidden');
+        }
+
         if (mobileMenuButton) mobileMenuButton.addEventListener('click', toggleMobileMenu);
         if (closeMobileMenuButton) closeMobileMenuButton.addEventListener('click', toggleMobileMenu);
         if (mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
@@ -1135,28 +1170,6 @@
                     });
             });
         }
-
-        // --- New: Course Button Functionality ---
-        console.log("Attaching event listeners for course buttons."); // Diagnostik
-        document.querySelectorAll('.view-course-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                console.log("Lihat Kursus button clicked for language:", this.dataset.lang); // Diagnostik
-                const language = this.dataset.lang; // Get language from data-lang attribute
-                if (language) {
-                    showMessage(`Anda memilih kursus Bahasa ${language}!`, 'success');
-                    // --- IDE UNTUK PENGEMBANGAN LEBIH LANJUT ---
-                    // Di sini Anda bisa:
-                    // 1. Mengarahkan pengguna ke halaman kursus spesifik:
-                    //    window.location.href = `courses/${language.toLowerCase()}.html`;
-                    // 2. Memuat konten kursus secara dinamis di halaman yang sama (misalnya dari Firestore):
-                    //    loadCourseContent(language);
-                    // 3. Menampilkan modal dengan detail kursus.
-                    // 4. Mengarahkan ke bagian kuis harian untuk bahasa tersebut (jika ada kuis yang spesifik).
-                } else {
-                    showMessage('Bahasa kursus tidak ditemukan.', 'error');
-                }
-            });
-        });
     </script>
 </body>
 </html>
