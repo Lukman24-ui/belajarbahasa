@@ -685,7 +685,13 @@
             const quizResult = document.getElementById('quizResult');
             const restartQuizBtn = document.getElementById('restartQuizBtn');
 
-            if (startQuizBtn) startQuizBtn.addEventListener('click', async () => {
+            // Add null checks for quiz elements
+            if (!startQuizBtn || !quizLangSelect || !quizContainer || !submitAnswerBtn || !nextQuestionBtn || !finishQuizBtn || !quizAnswerInput || !quizFeedback || !quizResult || !restartQuizBtn) {
+                console.error("Salah satu elemen UI kuis tidak ditemukan. Menunda setup kuis.");
+                return;
+            }
+
+            startQuizBtn.addEventListener('click', async () => {
                 const selectedLanguage = quizLangSelect.value;
                 if (!selectedLanguage) {
                     showMessage("Mohon pilih bahasa untuk kuis!", 'error');
@@ -694,10 +700,10 @@
                 await loadQuizQuestions(selectedLanguage);
             });
 
-            if (submitAnswerBtn) submitAnswerBtn.addEventListener('click', checkAnswer);
-            if (nextQuestionBtn) nextQuestionBtn.addEventListener('click', nextQuestion);
-            if (finishQuizBtn) finishQuizBtn.addEventListener('click', endQuiz);
-            if (restartQuizBtn) restartQuizBtn.addEventListener('click', resetQuiz);
+            submitAnswerBtn.addEventListener('click', checkAnswer);
+            nextQuestionBtn.addEventListener('click', nextQuestion);
+            finishQuizBtn.addEventListener('click', endQuiz);
+            restartQuizBtn.addEventListener('click', resetQuiz);
         }
 
         async function loadQuizQuestions(language) {
@@ -743,32 +749,47 @@
         }
 
         function displayQuestion() {
+            const currentQuestionNumberEl = document.getElementById('currentQuestionNumber');
+            const totalQuestionsEl = document.getElementById('totalQuestions');
+            const quizQuestionEl = document.getElementById('quizQuestion');
+            const quizAnswerInputEl = document.getElementById('quizAnswerInput');
+            const quizFeedbackEl = document.getElementById('quizFeedback');
+            const submitAnswerBtnEl = document.getElementById('submitAnswerBtn');
+            const nextQuestionBtnEl = document.getElementById('nextQuestionBtn');
+            const finishQuizBtnEl = document.getElementById('finishQuizBtn');
+            const quizOptionsEl = document.getElementById('quizOptions');
+
+            // Ensure all elements exist
+            if (!currentQuestionNumberEl || !totalQuestionsEl || !quizQuestionEl || !quizAnswerInputEl || !quizFeedbackEl || !submitAnswerBtnEl || !nextQuestionBtnEl || !finishQuizBtnEl || !quizOptionsEl) {
+                console.error("Salah satu elemen tampilan kuis tidak ditemukan.");
+                return;
+            }
+
             const questionData = currentQuizQuestions[currentQuestionIndex];
-            document.getElementById('currentQuestionNumber').textContent = currentQuestionIndex + 1;
-            document.getElementById('totalQuestions').textContent = QUIZ_QUESTION_LIMIT;
-            document.getElementById('quizQuestion').textContent = questionData.question;
-            document.getElementById('quizAnswerInput').value = '';
-            document.getElementById('quizFeedback').textContent = '';
+            currentQuestionNumberEl.textContent = currentQuestionIndex + 1;
+            totalQuestionsEl.textContent = QUIZ_QUESTION_LIMIT;
+            quizQuestionEl.textContent = questionData.question;
+            quizAnswerInputEl.value = '';
+            quizFeedbackEl.textContent = '';
 
-            document.getElementById('submitAnswerBtn').classList.remove('hidden');
-            document.getElementById('nextQuestionBtn').classList.add('hidden');
-            document.getElementById('finishQuizBtn').classList.add('hidden');
+            submitAnswerBtnEl.classList.remove('hidden');
+            nextQuestionBtnEl.classList.add('hidden');
+            finishQuizBtnEl.classList.add('hidden');
 
-            const quizOptions = document.getElementById('quizOptions');
-            quizOptions.innerHTML = '';
+            quizOptionsEl.innerHTML = '';
 
             if (questionData.type === 'multiple_choice' && questionData.options) {
-                document.getElementById('quizAnswerInput').classList.add('hidden');
+                quizAnswerInputEl.classList.add('hidden');
                 questionData.options.forEach((option, index) => {
                     const optionDiv = document.createElement('div');
                     optionDiv.innerHTML = `
                         <input type="radio" id="option${index}" name="quizOption" value="${option}" class="mr-2">
                         <label for="option${index}">${option}</label>
                     `;
-                    quizOptions.appendChild(optionDiv);
+                    quizOptionsEl.appendChild(optionDiv);
                 });
             } else {
-                document.getElementById('quizAnswerInput').classList.remove('hidden');
+                quizAnswerInputEl.classList.remove('hidden');
             }
         }
 
@@ -776,32 +797,42 @@
             const questionData = currentQuizQuestions[currentQuestionIndex];
             let userAnswer;
 
+            const quizFeedbackEl = document.getElementById('quizFeedback');
+            const submitAnswerBtnEl = document.getElementById('submitAnswerBtn');
+            const nextQuestionBtnEl = document.getElementById('nextQuestionBtn');
+            const finishQuizBtnEl = document.getElementById('finishQuizBtn');
+
+            if (!quizFeedbackEl || !submitAnswerBtnEl || !nextQuestionBtnEl || !finishQuizBtnEl) {
+                console.error("Salah satu elemen kontrol kuis tidak ditemukan.");
+                return;
+            }
+
             if (questionData.type === 'multiple_choice') {
                 const selectedOption = document.querySelector('input[name="quizOption"]:checked');
                 userAnswer = selectedOption ? selectedOption.value : '';
             } else {
-                userAnswer = document.getElementById('quizAnswerInput').value.trim();
+                const quizAnswerInputEl = document.getElementById('quizAnswerInput');
+                userAnswer = quizAnswerInputEl ? quizAnswerInputEl.value.trim() : '';
             }
 
-            const quizFeedback = document.getElementById('quizFeedback');
             const correctAnswer = questionData.answer.trim();
 
             if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
                 quizScore++;
-                quizFeedback.textContent = "Benar!";
-                quizFeedback.classList.remove('text-red-600');
-                quizFeedback.classList.add('text-green-600');
+                quizFeedbackEl.textContent = "Benar!";
+                quizFeedbackEl.classList.remove('text-red-600');
+                quizFeedbackEl.classList.add('text-green-600');
             } else {
-                quizFeedback.textContent = `Salah. Jawaban yang benar adalah: "${correctAnswer}"`;
-                quizFeedback.classList.remove('text-green-600');
-                quizFeedback.classList.add('text-red-600');
+                quizFeedbackEl.textContent = `Salah. Jawaban yang benar adalah: "${correctAnswer}"`;
+                quizFeedbackEl.classList.remove('text-green-600');
+                quizFeedbackEl.classList.add('text-red-600');
             }
 
-            document.getElementById('submitAnswerBtn').classList.add('hidden');
+            submitAnswerBtnEl.classList.add('hidden');
             if (currentQuestionIndex < QUIZ_QUESTION_LIMIT - 1) {
-                document.getElementById('nextQuestionBtn').classList.remove('hidden');
+                nextQuestionBtnEl.classList.remove('hidden');
             } else {
-                document.getElementById('finishQuizBtn').classList.remove('hidden');
+                finishQuizBtnEl.classList.remove('hidden');
             }
         }
 
@@ -815,18 +846,38 @@
         }
 
         function endQuiz() {
-            document.getElementById('quizContainer').classList.add('hidden');
-            document.getElementById('quizResult').classList.remove('hidden');
-            document.getElementById('finalScore').textContent = quizScore;
-            document.getElementById('maxScore').textContent = QUIZ_QUESTION_LIMIT;
+            const quizContainerEl = document.getElementById('quizContainer');
+            const quizResultEl = document.getElementById('quizResult');
+            const finalScoreEl = document.getElementById('finalScore');
+            const maxScoreEl = document.getElementById('maxScore');
+
+            if (!quizContainerEl || !quizResultEl || !finalScoreEl || !maxScoreEl) {
+                console.error("Salah satu elemen hasil kuis tidak ditemukan.");
+                return;
+            }
+
+            quizContainerEl.classList.add('hidden');
+            quizResultEl.classList.remove('hidden');
+            finalScoreEl.textContent = quizScore;
+            maxScoreEl.textContent = QUIZ_QUESTION_LIMIT;
             showMessage(`Kuis selesai! Skor Anda: ${quizScore}/${QUIZ_QUESTION_LIMIT}`);
         }
 
         function resetQuiz() {
-            document.getElementById('quizLanguageSelection').classList.remove('hidden');
-            document.getElementById('quizContainer').classList.add('hidden');
-            document.getElementById('quizResult').classList.add('hidden');
-            document.getElementById('quizLangSelect').value = '';
+            const quizLanguageSelectionEl = document.getElementById('quizLanguageSelection');
+            const quizContainerEl = document.getElementById('quizContainer');
+            const quizResultEl = document.getElementById('quizResult');
+            const quizLangSelectEl = document.getElementById('quizLangSelect');
+
+            if (!quizLanguageSelectionEl || !quizContainerEl || !quizResultEl || !quizLangSelectEl) {
+                console.error("Salah satu elemen reset kuis tidak ditemukan.");
+                return;
+            }
+
+            quizLanguageSelectionEl.classList.remove('hidden');
+            quizContainerEl.classList.add('hidden');
+            quizResultEl.classList.add('hidden');
+            quizLangSelectEl.value = '';
             currentQuizQuestions = [];
             currentQuestionIndex = 0;
             quizScore = 0;
@@ -856,30 +907,35 @@
         function showLoginForm() {
             hideAllAuthForms();
             if (loginFormSection) loginFormSection.classList.remove('hidden');
-            loginFormSection.scrollIntoView({ behavior: 'smooth' });
+            if (loginFormSection) loginFormSection.scrollIntoView({ behavior: 'smooth' });
         }
 
         function showRegisterForm() {
             hideAllAuthForms();
             if (registerFormSection) registerFormSection.classList.remove('hidden');
-            registerFormSection.scrollIntoView({ behavior: 'smooth' });
+            if (registerFormSection) registerFormSection.scrollIntoView({ behavior: 'smooth' });
         }
 
         // Event listeners for navigation buttons to show forms
-        document.getElementById('navLoginBtn').addEventListener('click', (e) => {
+        const navLoginBtn = document.getElementById('navLoginBtn');
+        const navRegisterBtn = document.getElementById('navRegisterBtn');
+        const mobileNavLoginBtn = document.getElementById('mobileNavLoginBtn');
+        const mobileNavRegisterBtn = document.getElementById('mobileNavRegisterBtn');
+
+        if (navLoginBtn) navLoginBtn.addEventListener('click', (e) => {
             e.preventDefault();
             showLoginForm();
         });
-        document.getElementById('navRegisterBtn').addEventListener('click', (e) => {
+        if (navRegisterBtn) navRegisterBtn.addEventListener('click', (e) => {
             e.preventDefault();
             showRegisterForm();
         });
-        document.getElementById('mobileNavLoginBtn').addEventListener('click', (e) => {
+        if (mobileNavLoginBtn) mobileNavLoginBtn.addEventListener('click', (e) => {
             e.preventDefault();
             showLoginForm();
             toggleMobileMenu(); // Close mobile menu after clicking
         });
-        document.getElementById('mobileNavRegisterBtn').addEventListener('click', (e) => {
+        if (mobileNavRegisterBtn) mobileNavRegisterBtn.addEventListener('click', (e) => {
             e.preventDefault();
             showRegisterForm();
             toggleMobileMenu(); // Close mobile menu after clicking
@@ -887,7 +943,7 @@
 
 
         // Register User
-        if (registerForm) {
+        if (registerForm && auth) { // Ensure auth is defined before attaching listener
             registerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = registerForm.registerEmail.value;
@@ -906,7 +962,7 @@
         }
 
         // Login User
-        if (loginForm) {
+        if (loginForm && auth) { // Ensure auth is defined before attaching listener
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = loginForm.loginEmail.value;
@@ -925,7 +981,7 @@
         }
 
         // Logout User
-        if (navLogoutBtn) {
+        if (navLogoutBtn && auth) { // Ensure auth is defined before attaching listener
             navLogoutBtn.addEventListener('click', async () => {
                 try {
                     await signOut(auth);
@@ -938,7 +994,7 @@
             });
         }
 
-        if (mobileNavLogoutBtn) {
+        if (mobileNavLogoutBtn && auth) { // Ensure auth is defined before attaching listener
             mobileNavLogoutBtn.addEventListener('click', async () => {
                 try {
                     await signOut(auth);
