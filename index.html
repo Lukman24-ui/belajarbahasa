@@ -620,8 +620,8 @@
             console.log("Attaching event listeners to .view-course-btn...");
             document.querySelectorAll('.view-course-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    const language = this.dataset.lang;
-                    console.log(`[view-course-btn] Button clicked for language: ${language}`);
+                    const language = this.dataset.lang; // Get language from data-lang attribute
+                    console.log(`[view-course-btn] Button clicked for language: ${language}`); // Log button click
                     if (language) {
                         showMessage(`Anda memilih kursus Bahasa ${language}!`, 'success');
                     } else {
