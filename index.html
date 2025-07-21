@@ -506,41 +506,37 @@
 
         // Function to display messages (instead of alert())
         function showMessage(message, type = 'success') {
-            console.log("showMessage called:", message, type); // Diagnostik
             const messageBox = document.getElementById('messageBox');
             if (messageBox) {
-                console.log("messageBox found. Displaying message."); // Diagnostik
                 messageBox.textContent = message;
                 messageBox.className = 'message-box'; // Reset classes
                 if (type === 'error') {
                     messageBox.classList.add('error');
                 }
                 messageBox.classList.add('active'); // Show message
+                console.log(`[showMessage] Displaying: ${message} (${type})`); // Log message
                 setTimeout(() => {
                     messageBox.classList.remove('active'); // Hide message
                 }, 3000);
             } else {
-                console.warn("Message box element not found:", message); // Diagnostik
+                console.warn("Message box element not found:", message);
             }
         }
 
         // Initialize Firebase and set up authentication
         window.addEventListener('DOMContentLoaded', async () => {
-            console.log("DOMContentLoaded fired. Initializing Firebase..."); // Diagnostik
-            try { // Broader try-catch for overall initialization
-                // Check if firebaseConfig is truly available and valid
-                if (typeof __firebase_config === 'undefined' || Object.keys(JSON.parse(__firebase_config)).length === 0 || !JSON.parse(__firebase_config).apiKey) {
-                    showMessage("Firebase config tidak ditemukan atau tidak lengkap. Mohon pastikan Anda telah menyediakan konfigurasi Firebase yang valid di lingkungan Canvas.", 'error');
-                    console.error("Firebase config is missing or incomplete:", typeof __firebase_config === 'undefined' ? 'undefined' : JSON.parse(__firebase_config));
-                    // Do NOT initialize Firebase objects if config is bad.
-                    // This allows non-Firebase related JS to run without errors from undefined 'auth'.
+            console.log("DOMContentLoaded fired. Initializing Firebase...");
+            try {
+                if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
+                    showMessage("Firebase config tidak ditemukan atau tidak lengkap. Pastikan '__firebase_config' tersedia.", 'error');
+                    console.error("Firebase config is missing or incomplete:", firebaseConfig);
+                    // Lanjutkan eksekusi tanpa inisialisasi Firebase jika config tidak valid
                 } else {
-                    const parsedFirebaseConfig = JSON.parse(__firebase_config);
-                    app = initializeApp(parsedFirebaseConfig);
+                    app = initializeApp(firebaseConfig);
                     db = getFirestore(app);
                     auth = getAuth(app);
 
-                    // Now that 'auth' is initialized, set up the listener
+                    // Listener for auth state changes
                     onAuthStateChanged(auth, async (user) => {
                         const navLoginBtn = document.getElementById('navLoginBtn');
                         const navRegisterBtn = document.getElementById('navRegisterBtn');
@@ -564,72 +560,70 @@
                             if (mobileNavLogoutBtn) mobileNavLogoutBtn.classList.remove('hidden');
 
                         } else {
-                            // If no user is signed in, try anonymous sign-in (only once on load)
-                            if (!isAuthReady) { // Only attempt anonymous sign-in if auth state hasn't been fully determined yet
-                                try {
-                                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                                        await signInWithCustomToken(auth, __initial_auth_token);
-                                    } else {
-                                        await signInAnonymously(auth);
-                                    }
-                                    // onAuthStateChanged will be triggered again with the anonymous user
-                                } catch (anonError) {
-                                    console.error("Kesalahan saat mencoba masuk anonim:", anonError);
-                                    userId = crypto.randomUUID(); // Fallback to a random ID if anonymous sign-in fails
-                                    if (userIdDisplay) userIdDisplay.textContent = userId + " (Anonim/Gagal Auth)";
-                                    showMessage(`Gagal autentikasi: ${anonError.message}. Menggunakan ID anonim sementara.`, 'error');
-                                }
-                            } else {
-                                // User is explicitly signed out or anonymous sign-in failed previously
-                                userId = crypto.randomUUID(); // Fallback for truly unauthenticated state
-                                if (userIdDisplay) userIdDisplay.textContent = userId + " (Anonim)";
+                            // Pengguna secara eksplisit keluar atau masuk anonim gagal sebelumnya
+                            userId = crypto.randomUUID(); // Fallback untuk status yang benar-benar tidak terautentikasi
+                            if (userIdDisplay) userIdDisplay.textContent = userId + " (Anonim)";
 
-                                // Show login/register, hide logout
-                                if (navLoginBtn) navLoginBtn.classList.remove('hidden');
-                                if (navRegisterBtn) navRegisterBtn.classList.remove('hidden');
-                                if (navLogoutBtn) navLogoutBtn.classList.add('hidden');
-                                if (mobileNavLoginBtn) mobileNavLoginBtn.classList.remove('hidden');
-                                if (mobileNavRegisterBtn) mobileNavRegisterBtn.classList.remove('hidden');
-                                if (mobileNavLogoutBtn) mobileNavLogoutBtn.classList.add('hidden');
-                            }
+                            // Tampilkan login/register, sembunyikan logout
+                            if (navLoginBtn) navLoginBtn.classList.remove('hidden');
+                            if (navRegisterBtn) navRegisterBtn.classList.remove('hidden');
+                            if (navLogoutBtn) navLogoutBtn.classList.add('hidden');
+                            if (mobileNavLoginBtn) mobileNavLoginBtn.classList.remove('hidden');
+                            if (mobileNavRegisterBtn) mobileNavRegisterBtn.classList.remove('hidden');
+                            if (mobileNavLogoutBtn) mobileNavLogoutBtn.classList.add('hidden');
                         }
-                        isAuthReady = true; // Auth state has been checked at least once
-                        setupFirestoreListener(); // Setup Firestore listener after auth state is determined
-                        setupQuizUI(); // Setup quiz UI after auth is ready
+                        isAuthReady = true; // Status autentikasi telah diperiksa setidaknya sekali
+                        // Hanya panggil setupFirestoreListener dan setupQuizUI jika Firebase berhasil diinisialisasi
+                        if (db && auth) {
+                            setupFirestoreListener();
+                            setupQuizUI();
+                        } else {
+                            console.warn("Firebase tidak diinisialisasi. Fitur yang bergantung pada Firebase mungkin tidak berfungsi.");
+                        }
                     });
 
-                    // Attempt initial anonymous sign-in if auth is ready and no user is logged in yet
-                    // This needs to be outside onAuthStateChanged to handle initial state, but only if auth is defined
-                    if (!auth.currentUser) { // Check if no user is already signed in
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } else {
-                            await signInAnonymously(auth);
+                    // Initial sign-in attempt (only if auth is successfully initialized)
+                    if (auth) {
+                        try {
+                            // Prioritaskan __initial_auth_token dari Canvas jika ada
+                            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                console.log("Mencoba masuk dengan token kustom dari Canvas (awal)...");
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                            } else {
+                                console.log("Mencoba masuk secara anonim (awal)...");
+                                await signInAnonymously(auth);
+                            }
+                        } catch (initialAuthError) {
+                            console.error("Kesalahan saat mencoba masuk awal (token kustom/anonim):", initialAuthError);
+                            // Fallback ke anonymous jika custom token gagal
+                            if (initialAuthError.code === 'auth/custom-token-mismatch' || initialAuthError.code === 'auth/invalid-custom-token') {
+                                console.log("Token kustom tidak valid, mencoba masuk anonim sebagai fallback...");
+                                try {
+                                    await signInAnonymously(auth);
+                                } catch (anonFallbackError) {
+                                    console.error("Kesalahan saat mencoba masuk anonim setelah token kustom gagal:", anonFallbackError);
+                                    showMessage(`Gagal autentikasi: ${anonFallbackError.message}. Menggunakan ID anonim sementara.`, 'error');
+                                }
+                            } else {
+                                showMessage(`Kesalahan autentikasi awal: ${initialAuthError.message}. Menggunakan ID anonim sementara.`, 'error');
+                            }
                         }
                     }
                 }
 
             } catch (error) {
-                console.error("Kesalahan umum saat inisialisasi aplikasi atau autentikasi awal:", error); // Tangkap error umum
+                console.error("Kesalahan umum saat inisialisasi aplikasi atau autentikasi awal:", error);
                 showMessage(`Kesalahan umum: ${error.message}`, 'error');
             }
 
-            // --- Course Button Functionality (Ensure this is always attached) ---
-            console.log("Attaching event listeners to .view-course-btn..."); // Diagnostik
+            // --- New: Course Button Functionality (Moved inside DOMContentLoaded) ---
+            console.log("Attaching event listeners to .view-course-btn...");
             document.querySelectorAll('.view-course-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    const language = this.dataset.lang; // Get language from data-lang attribute
-                    console.log(`[view-course-btn] Button clicked for language: ${language}`); // Diagnostik
+                    const language = this.dataset.lang;
+                    console.log(`[view-course-btn] Button clicked for language: ${language}`);
                     if (language) {
                         showMessage(`Anda memilih kursus Bahasa ${language}!`, 'success');
-                        // --- IDE UNTUK PENGEMBANGAN LEBIH LANJUT ---
-                        // Di sini Anda bisa:
-                        // 1. Mengarahkan pengguna ke halaman kursus spesifik:
-                        //    window.location.href = `courses/${language.toLowerCase()}.html`;
-                        // 2. Memuat konten kursus secara dinamis di halaman yang sama (misalnya dari Firestore):
-                        //    loadCourseContent(language);
-                        // 3. Menampilkan modal dengan detail kursus.
-                        // 4. Mengarahkan ke bagian kuis harian untuk bahasa tersebut (jika ada kuis yang spesifik).
                     } else {
                         showMessage('Bahasa kursus tidak ditemukan.', 'error');
                     }
@@ -647,19 +641,17 @@
             const notesList = document.getElementById('notesList');
             const loadingNotes = document.getElementById('loadingNotes');
 
-            // Check if elements exist before manipulating them
             if (!notesList || !loadingNotes) {
                 console.error("Elemen 'notesList' atau 'loadingNotes' tidak ditemukan di DOM. Menunda setup listener.");
                 return;
             }
 
-            // Public data collection path: /artifacts/{appId}/public/data/{your_collection_name}
             const notesCollectionRef = collection(db, `artifacts/${appId}/public/data/notes`);
             const q = query(notesCollectionRef);
 
             onSnapshot(q, (snapshot) => {
-                notesList.innerHTML = ''; // Clear existing notes
-                loadingNotes.style.display = 'none'; // Hide loading text
+                notesList.innerHTML = '';
+                loadingNotes.style.display = 'none';
 
                 if (snapshot.empty) {
                     notesList.innerHTML = '<p class="text-gray-500 text-center">Belum ada catatan. Tambahkan yang pertama!</p>';
@@ -682,37 +674,33 @@
         }
 
         // Add Note functionality
-        const addNoteBtn = document.getElementById('addNoteBtn');
-        if (addNoteBtn) { // Pastikan tombol ada
-            addNoteBtn.addEventListener('click', async () => {
-                const noteInput = document.getElementById('noteInput');
-                const noteText = noteInput ? noteInput.value.trim() : '';
+        document.getElementById('addNoteBtn').addEventListener('click', async () => {
+            const noteInput = document.getElementById('noteInput');
+            const noteText = noteInput.value.trim();
 
-                if (noteText === '') {
-                    showMessage("Catatan tidak boleh kosong!", 'error');
-                    return;
-                }
+            if (noteText === '') {
+                showMessage("Catatan tidak boleh kosong!", 'error');
+                return;
+            }
 
-                if (!db || !userId || !isAuthReady) {
-                    showMessage("Firebase belum siap atau ID pengguna tidak ada. Coba lagi.", 'error');
-                    return;
-                }
+            if (!db || !userId || !isAuthReady) {
+                showMessage("Firebase belum siap atau ID pengguna tidak ada. Coba lagi.", 'error');
+                return;
+            }
 
-                try {
-                    await addDoc(collection(db, `artifacts/${appId}/public/data/notes`), {
-                        text: noteText,
-                        authorId: userId,
-                        timestamp: serverTimestamp()
-                    });
-                    if (noteInput) noteInput.value = ''; // Clear input
-                    showMessage("Catatan berhasil ditambahkan!");
-                } catch (error) {
-                    console.error("Kesalahan menambahkan catatan:", error);
-                    showMessage(`Gagal menambahkan catatan: ${error.message}`, 'error');
-                }
-            });
-        }
-
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/public/data/notes`), {
+                    text: noteText,
+                    authorId: userId,
+                    timestamp: serverTimestamp()
+                });
+                noteInput.value = '';
+                showMessage("Catatan berhasil ditambahkan!");
+            } catch (error) {
+                console.error("Kesalahan menambahkan catatan:", error);
+                showMessage(`Gagal menambahkan catatan: ${error.message}`, 'error');
+            }
+        });
 
         // Quiz Functions
         function setupQuizUI() {
@@ -727,7 +715,6 @@
             const quizResult = document.getElementById('quizResult');
             const restartQuizBtn = document.getElementById('restartQuizBtn');
 
-            // Add null checks for quiz elements
             if (!startQuizBtn || !quizLangSelect || !quizContainer || !submitAnswerBtn || !nextQuestionBtn || !finishQuizBtn || !quizAnswerInput || !quizFeedback || !quizResult || !restartQuizBtn) {
                 console.error("Salah satu elemen UI kuis tidak ditemukan. Menunda setup kuis.");
                 return;
@@ -1157,10 +1144,11 @@
         }
 
         // PWA: Register Service Worker
+        // Menonaktifkan pendaftaran Service Worker untuk lingkungan Canvas karena masalah protokol URL
+        /*
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                const serviceWorkerUrl = new URL('service-worker.js', location.href).href;
-                navigator.serviceWorker.register(serviceWorkerUrl, { scope: './' })
+                navigator.serviceWorker.register('./service-worker.js', { scope: './' })
                     .then(registration => {
                         console.log('Service Worker registered successfully:', registration);
                     })
@@ -1170,6 +1158,20 @@
                     });
             });
         }
+        */
+
+        // --- Course Button Functionality ---
+        document.querySelectorAll('.view-course-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const language = this.dataset.lang;
+                console.log(`[view-course-btn] Button clicked for language: ${language}`);
+                if (language) {
+                    showMessage(`Anda memilih kursus Bahasa ${language}!`, 'success');
+                } else {
+                    showMessage('Bahasa kursus tidak ditemukan.', 'error');
+                }
+            });
+        });
     </script>
 </body>
 </html>
